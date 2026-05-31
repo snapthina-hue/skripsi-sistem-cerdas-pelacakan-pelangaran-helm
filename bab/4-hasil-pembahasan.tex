@@ -20,6 +20,8 @@ Sub-bab ini melaporkan tiga kelompok temuan secara berurutan, sejalan dengan tah
 \label{subsec:hasil-model}
 % ------------------------------------------------------------
 
+Sub-bab ini memaparkan temuan tahap pengembangan model mengikuti urutan kerja pada Bab~\ref{chap:metodologi}. Penyajian bergerak dari hulu ke hilir: karakteristik dataset beserta sebaran spasial anotasi, hasil pra-pemrosesan dan augmentasi, konfigurasi pelatihan dengan dinamika kurva galat, lalu ditutup metrik evaluasi kinerja pada data validasi dan uji. Urutan tersebut menempatkan kualitas data sebagai pijakan sebelum kinerja model dibaca, sehingga setiap angka evaluasi dapat dirunut balik ke kondisi data yang melatihnya.
+
 \subsubsection{Karakteristik Dataset dan Sebaran Spasial Anotasi}
 \label{subsubsec:hasil-eda}
 
@@ -181,6 +183,8 @@ Tabel~\ref{tab:metrik-test-objek} menyajikan AP@50 tiap kelas beserta nilai agre
 \subsection{Hasil Implementasi \textit{Pipeline Streaming} Deteksi Waktu Nyata}
 \label{subsec:hasil-pipeline}
 % ------------------------------------------------------------
+
+Sub-bab ini melaporkan keluaran nyata \textit{pipeline} ketika diuji pada potongan 3.001 \textit{frame} video gerbang utama. Paparan disusun mengikuti aliran data: arsitektur beserta keluaran tiap tahap pada \textit{frame} awal, persistensi pelacakan dengan selektivitas filter berlapis, kemudian kinerja sisi \textit{edge} dan lapisan distribusi. Susunan berurutan ini memperlihatkan bagaimana piksel mentah berubah bertahap menjadi catatan peristiwa, sekaligus menjaga paralel dengan rancangan \textit{pipeline} pada Bab~\ref{chap:metodologi}.
 
 \subsubsection{Arsitektur dan Keluaran Tiap Tahap pada \textit{Frame} Awal}
 \label{subsubsec:hasil-arsitektur}
@@ -539,6 +543,8 @@ Tabel~\ref{tab:spark-microbatch} menunjukkan bahwa sebagian besar interval pemro
 \label{subsec:hasil-datamart}
 
 % ------------------------------------------------------------
+
+Sub-bab ini menyajikan temuan tahap analitik dari rekaman operasional penuh 10 jam. Urutan paparan dimulai dari volume dan sampel \textit{data mart}, dilanjutkan waktu eksekusi kueri \textit{benchmark}, lalu tampilan \textit{dashboard} Grafana yang membaca tabel fakta yang sama. Alur tersebut bergerak dari data yang tersimpan menuju cara data diakses, dan berakhir pada cara data ditampilkan kepada operator.
 
 \subsubsection{Volume dan Sampel \textit{Data Mart}}
 \label{subsubsec:hasil-volume}
