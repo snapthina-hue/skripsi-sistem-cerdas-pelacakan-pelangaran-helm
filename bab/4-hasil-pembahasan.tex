@@ -42,9 +42,9 @@ Dataset mentah hasil tangkapan CCTV memuat 390 citra unik berukuran median $1280
   \end{tabular}
 \end{table}
 
-Tabel~\ref{tab:distribusi-objek} memuat tiga kelas dengan jumlah anotasi yang relatif berdekatan. Kelas \texttt{DRIVER\_HELMET} dan \texttt{DRIVER\_NO\_HELMET} hanya berselisih 12 anotasi atau rasio 1{,}02$:$1, sedangkan \texttt{MOTORCYCLE} sebagai kelas konteks memuat 921 anotasi. Rasio kelas mayoritas terhadap kelas minoritas adalah 921$:$718 atau 1{,}28$:$1.
+Tabel~\ref{tab:distribusi-objek} memuat tiga kelas dengan jumlah anotasi yang relatif berdekatan. Kelas \texttt{DRIVER\_HELMET} dan \texttt{DRIVER\_NO\_HELMET} hanya berselisih 12 anotasi atau rasio 1{,}02$:$1, sedangkan \texttt{MOTORCYCLE} sebagai kelas konteks memuat 921 anotasi. Rasio kelas mayoritas terhadap kelas minoritas adalah 921$:$718 atau 1{,}28$:$1. Ketiga kelas berada pada rentang jumlah yang berdekatan, sehingga komposisi anotasi pada dataset awal tergolong relatif berimbang.
 
-Selain dari sisi jumlah, posisi kemunculan objek pada bidang pandang kamera diperiksa melalui peta panas (\textit{annotation heatmap}). Gambar~\ref{fig:heatmap-per-class} menampilkan kepadatan \textit{bounding box} pada setiap \textit{grid} citra dengan gradasi biru muda hingga merah pekat. Nilai minimum, kuartil pertama, dan median pada legenda sama-sama 0 anotasi, kuartil ketiga 11 anotasi, sedangkan \textit{grid} terpadat memuat 172 anotasi.
+Selain dari sisi jumlah, posisi kemunculan objek pada bidang pandang kamera diperiksa melalui peta panas (\textit{annotation heatmap}). Gambar~\ref{fig:heatmap-per-class} menampilkan kepadatan \textit{bounding box} pada setiap \textit{grid} citra dengan gradasi biru muda hingga merah pekat. Nilai minimum, kuartil pertama, dan median pada legenda sama-sama 0 anotasi, kuartil ketiga 11 anotasi, sedangkan \textit{grid} terpadat memuat 172 anotasi. Nilai legenda yang mayoritas nol menandakan anotasi terkonsentrasi pada sebagian kecil \textit{grid}, sementara sebagian besar bidang citra tidak memuat objek.
 
 \begin{figure}[htbp]
   \centering
@@ -53,7 +53,7 @@ Selain dari sisi jumlah, posisi kemunculan objek pada bidang pandang kamera dipe
   \label{fig:heatmap-per-class}
 \end{figure}
 
-Pada Gambar~\ref{fig:heatmap-per-class}(a), anotasi kelas \texttt{DRIVER\_HELMET} mengumpul di bagian tengah hingga kanan atas citra dengan titik paling padat di lajur masuk utama. Pola sebaran kelas \texttt{DRIVER\_NO\_HELMET} pada Gambar~\ref{fig:heatmap-per-class}(b) hampir sama, hanya saja zona terpadatnya sedikit bergeser ke kiri tengah. Gambar~\ref{fig:heatmap-per-class}(c) untuk kelas \texttt{MOTORCYCLE} memperlihatkan zona kepadatan yang nyaris sama dengan kelas \texttt{DRIVER\_HELMET}. Di luar zona-zona padat, warna peta panas didominasi biru muda hingga abu-abu yang menandakan \textit{grid} kosong, mencakup langit, trotoar, dan jalur berlawanan di tepi citra.
+Pada Gambar~\ref{fig:heatmap-per-class}(a), anotasi kelas \texttt{DRIVER\_HELMET} mengumpul di bagian tengah hingga kanan atas citra dengan titik paling padat di lajur masuk utama. Pola sebaran kelas \texttt{DRIVER\_NO\_HELMET} pada Gambar~\ref{fig:heatmap-per-class}(b) hampir sama, hanya saja zona terpadatnya sedikit bergeser ke kiri tengah. Gambar~\ref{fig:heatmap-per-class}(c) untuk kelas \texttt{MOTORCYCLE} memperlihatkan zona kepadatan yang nyaris sama dengan kelas \texttt{DRIVER\_HELMET}. Di luar zona-zona padat, warna peta panas didominasi biru muda hingga abu-abu yang menandakan \textit{grid} kosong, mencakup langit, trotoar, dan jalur berlawanan di tepi citra. Pemusatan ketiga kelas pada wilayah yang relatif sama menegaskan jalur lintas kendaraan sebagai fokus utama pengamatan, sekaligus menjadi dasar penyiapan citra pada tahap pra-pemrosesan berikutnya.
 
 \subsubsection{Hasil Pra-pemrosesan dan Augmentasi Data}
 \label{subsubsec:hasil-preprocessing}
@@ -109,7 +109,7 @@ Hasil augmentasi \textit{Gaussian blur} pada Gambar~\ref{fig:aug-blur} memperlih
   \label{fig:aug-noise}
 \end{figure}
 
-Gambar~\ref{fig:aug-noise} menampilkan hasil augmentasi \textit{additive noise} sebesar 1\% dari total piksel citra. Efek \textit{noise} menghasilkan bintik-bintik halus yang tersebar pada permukaan gambar, terutama pada area jalan dan latar belakang. Detail tepi objek sedikit terganggu, namun struktur kendaraan dan pengendara tetap dapat diamati secara visual.
+Gambar~\ref{fig:aug-noise} menampilkan hasil augmentasi \textit{additive noise} sebesar 1\% dari total piksel citra. Efek \textit{noise} menghasilkan bintik-bintik halus yang tersebar pada permukaan gambar, terutama pada area jalan dan latar belakang. Detail tepi objek sedikit terganggu, namun struktur kendaraan dan pengendara tetap dapat diamati secara visual. Secara keseluruhan, keenam teknik augmentasi menambah keragaman orientasi, pencahayaan, dan kualitas citra tanpa menghilangkan objek utama, sehingga variasi sintetis ini memperluas ragam kondisi yang harus dikenali model saat pelatihan.
 
 \subsubsection{Konfigurasi Pelatihan dan Dinamika Kurva Galat}
 \label{subsubsec:hasil-training}
@@ -123,7 +123,7 @@ Dataset yang sudah diperluas dibagi dengan rasio 82\% pelatihan (699 citra), 9\%
 \label{fig:train-loss}
 \end{figure}
 
-Gambar~\ref{fig:train-loss} panel (A) memperlihatkan \texttt{train/box\_loss} turun dari sekitar 2,0 di \textit{epoch} awal hingga sekitar 0,5 menjelang \textit{epoch} 300, dengan penurunan paling tajam dalam 30 \textit{epoch} pertama. Panel (B) memperlihatkan \texttt{train/cls\_loss} jatuh tajam dari 4,0 ke sekitar 1,0 dalam 10 \textit{epoch} pertama, lalu melandai sampai sekitar 0,4 di akhir pelatihan. Panel (C) memperlihatkan \texttt{train/dfl\_loss} bergerak dari 1,55 menuju 0,83 dengan penurunan lebih landai dibanding dua kurva sebelumnya.
+Gambar~\ref{fig:train-loss} panel (A) memperlihatkan \texttt{train/box\_loss} turun dari sekitar 2,0 di \textit{epoch} awal hingga sekitar 0,5 menjelang \textit{epoch} 300, dengan penurunan paling tajam dalam 30 \textit{epoch} pertama. Panel (B) memperlihatkan \texttt{train/cls\_loss} jatuh tajam dari 4,0 ke sekitar 1,0 dalam 10 \textit{epoch} pertama, lalu melandai sampai sekitar 0,4 di akhir pelatihan. Panel (C) memperlihatkan \texttt{train/dfl\_loss} bergerak dari 1,55 menuju 0,83 dengan penurunan lebih landai dibanding dua kurva sebelumnya. Ketiga komponen galat pelatihan menurun konsisten lalu melandai menjelang akhir, sehingga pola \textit{train loss} tidak memperlihatkan lonjakan yang menandakan ketidakstabilan pelatihan.
 
 \begin{figure}[H]
 \centering
@@ -132,7 +132,7 @@ Gambar~\ref{fig:train-loss} panel (A) memperlihatkan \texttt{train/box\_loss} tu
 \label{fig:val-loss}
 \end{figure}
 
-Gambar~\ref{fig:val-loss} panel (A) memperlihatkan \texttt{val/box\_loss} dimulai pada kisaran 1,4--1,5 dan masih bergejolak pada 30--90 \textit{epoch} pertama dengan beberapa lonjakan ke atas 1,5. Mulai \textit{epoch} 150, kurva mendatar di sekitar 0,99 dan bertahan sampai \textit{epoch} 300. Panel (B) menunjukkan \texttt{val/cls\_loss} turun tajam dari 3,5 ke 1,0 sebelum \textit{epoch} 30 lalu melandai sampai sekitar 0,6 di akhir pelatihan. Panel (C) menampilkan \texttt{val/dfl\_loss} sempat turun dari 1,15 ke kisaran 1,05--1,10 dalam 60 \textit{epoch} pertama, lalu merangkak naik ke kisaran 1,15--1,16 hingga \textit{epoch} 300.
+Gambar~\ref{fig:val-loss} panel (A) memperlihatkan \texttt{val/box\_loss} dimulai pada kisaran 1,4--1,5 dan masih bergejolak pada 30--90 \textit{epoch} pertama dengan beberapa lonjakan ke atas 1,5. Mulai \textit{epoch} 150, kurva mendatar di sekitar 0,99 dan bertahan sampai \textit{epoch} 300. Panel (B) menunjukkan \texttt{val/cls\_loss} turun tajam dari 3,5 ke 1,0 sebelum \textit{epoch} 30 lalu melandai sampai sekitar 0,6 di akhir pelatihan. Panel (C) menampilkan \texttt{val/dfl\_loss} sempat turun dari 1,15 ke kisaran 1,05--1,10 dalam 60 \textit{epoch} pertama, lalu merangkak naik ke kisaran 1,15--1,16 hingga \textit{epoch} 300. Kurva validasi \textit{box} dan \textit{cls} yang mendatar berlawanan dengan \textit{dfl} yang sedikit merangkak naik di paruh akhir, sehingga gambaran kinerja sesungguhnya perlu dibaca bersama metrik akurasi pada bagian evaluasi berikutnya.
 
 \subsubsection{Hasil Evaluasi Kinerja Model}
 \label{subsubsec:hasil-evaluasi}
@@ -155,7 +155,7 @@ Kinerja model dinilai pada himpunan validasi (\textit{validation set}) memakai t
 \end{tabular}
 \end{table}
 
-Tabel~\ref{tab:metrik-validasi} memperlihatkan mAP@50 sebesar 91,4\% dengan \textit{precision} 87,5\% dan \textit{recall} 86,5\%. Selisih antara \textit{precision} dan \textit{recall} adalah 1,0 \%, sehingga F1 Score yang merupakan rata-rata harmonik keduanya berada di 87,0\%.
+Tabel~\ref{tab:metrik-validasi} memperlihatkan mAP@50 sebesar 91,4\% dengan \textit{precision} 87,5\% dan \textit{recall} 86,5\%. Selisih antara \textit{precision} dan \textit{recall} adalah 1,0 \%, sehingga F1 Score yang merupakan rata-rata harmonik keduanya berada di 87,0\%. Selisih \textit{precision}--\textit{recall} yang hanya 1,0\% menunjukkan deteksi model tidak berat sebelah antara ketelitian dan kelengkapan pada data validasi.
 
 Kinerja model di luar data yang sudah dipelajari kemudian diuji pada data uji (\textit{test set}) yang terpisah sepenuhnya dari proses pelatihan. Hasil per kelas berupa \textit{Average Precision} (AP) pada ambang IoU 50\% disajikan pada Tabel~\ref{tab:metrik-test-objek}.
 
@@ -175,7 +175,7 @@ Kinerja model di luar data yang sudah dipelajari kemudian diuji pada data uji (\
 \end{tabular}
 \end{table}
 
-Tabel~\ref{tab:metrik-test-objek} menyajikan AP@50 tiap kelas beserta nilai agregat pada himpunan uji. mAP@50 agregat tercatat 90,0\%, hanya berbeda 1,4 \% dari mAP validasi sebesar 91,4\%. AP per kelas tertinggi diperoleh \texttt{MOTORCYCLE} 94,0\%, diikuti \texttt{DRIVER\_NO\_HELMET} 90,0\%, dan \texttt{DRIVER\_HELMET} 87,0\%.
+Tabel~\ref{tab:metrik-test-objek} menyajikan AP@50 tiap kelas beserta nilai agregat pada himpunan uji. mAP@50 agregat tercatat 90,0\%, hanya berbeda 1,4 \% dari mAP validasi sebesar 91,4\%. AP per kelas tertinggi diperoleh \texttt{MOTORCYCLE} 94,0\%, diikuti \texttt{DRIVER\_NO\_HELMET} 90,0\%, dan \texttt{DRIVER\_HELMET} 87,0\%. Kelas \texttt{MOTORCYCLE} sebagai objek konteks meraih AP@50 tertinggi, sedangkan \texttt{DRIVER\_HELMET} menjadi kelas tersulit dengan nilai terendah. Selisih mAP uji terhadap validasi yang hanya 1,4\% memperlihatkan kinerja model tetap stabil pada data di luar pelatihan, sehingga model dinilai layak diintegrasikan ke \textit{pipeline} deteksi waktu nyata.
 
 % ------------------------------------------------------------
 \subsection{Hasil Implementasi \textit{Pipeline Streaming} Deteksi Waktu Nyata}
@@ -268,7 +268,7 @@ Gambar~\ref{fig:pipeline-flow} memperlihatkan bahwa keluaran dari setiap tahap m
 \end{tabular}
 \end{table}
 
-Tabel~\ref{tab:output-yolo} menunjukkan bahwa seluruh objek terdeteksi dengan nilai \textit{confidence} di atas 0,88. Dua objek \texttt{MOTORCYCLE} memiliki area \textit{bounding box} lebih besar dibanding objek pengendara karena mencakup keseluruhan badan kendaraan. Sementara itu, objek \texttt{DRIVER\_HELMET} memiliki koordinat yang berada di area atas kendaraan sesuai posisi kepala pengendara pada citra.
+Tabel~\ref{tab:output-yolo} menunjukkan bahwa seluruh objek terdeteksi dengan nilai \textit{confidence} di atas 0,88. Dua objek \texttt{MOTORCYCLE} memiliki area \textit{bounding box} lebih besar dibanding objek pengendara karena mencakup keseluruhan badan kendaraan. Sementara itu, objek \texttt{DRIVER\_HELMET} memiliki koordinat yang berada di area atas kendaraan sesuai posisi kepala pengendara pada citra. Perbedaan ukuran kotak antara kendaraan dan kepala pengendara terlihat konsisten pada keempat objek, dan keterkaitan keduanya ditegaskan melalui perhitungan IoA pada tahap berikutnya.
 
 Keluaran YOLOv8 diteruskan ke ByteTrack untuk memperoleh \texttt{Track ID}, kemudian nilai \textit{Intersection over Area} (IoA) dihitung antara kandidat pengendara dan kendaraan terdekat. Hasil tahap ini pada \textit{frame} yang sama ditampilkan pada Tabel~\ref{tab:output-bytetrack-ioa}.
 
@@ -291,7 +291,7 @@ Keluaran YOLOv8 diteruskan ke ByteTrack untuk memperoleh \texttt{Track ID}, kemu
 }
 \end{table}
 
-Tabel~\ref{tab:output-bytetrack-ioa} memperlihatkan bahwa kedua objek pengendara berhasil dipasangkan dengan kendaraan yang sesuai berdasarkan kedekatan spasial. Nilai IoA sebesar 0,5820 dan 0,5996 berada di atas ambang minimum 0,3 sehingga kedua pasangan dinyatakan valid. Pada tahap ini, setiap objek juga memperoleh \texttt{Track ID} yang digunakan untuk menjaga konsistensi identitas antar-\textit{frame}.
+Tabel~\ref{tab:output-bytetrack-ioa} memperlihatkan bahwa kedua objek pengendara berhasil dipasangkan dengan kendaraan yang sesuai berdasarkan kedekatan spasial. Nilai IoA sebesar 0,5820 dan 0,5996 berada di atas ambang minimum 0,3 sehingga kedua pasangan dinyatakan valid. Pada tahap ini, setiap objek juga memperoleh \texttt{Track ID} yang digunakan untuk menjaga konsistensi identitas antar-\textit{frame}. Kedua nilai IoA berada jauh di atas ambang 0,3, sehingga tidak ada pasangan yang jatuh di zona ambang yang meragukan pada \textit{frame} ini.
 
 Mekanisme konfirmasi temporal untuk kelas \texttt{DRIVER\_NO\_HELMET} digambarkan pada Gambar~\ref{fig:streak-timeline}. Sistem tidak langsung menghasilkan \textit{event} ketika deteksi muncul pada satu \textit{frame}, melainkan menunggu hingga objek bertahan selama tiga \textit{frame} berturut-turut.
 
@@ -377,7 +377,7 @@ Durasi pelacakan terpanjang & 419 \textit{frame} \\
 \end{tabular}
 \end{table}
 
-Tabel~\ref{tab:bytetrack-basic-stats} menunjukkan bahwa sebagian besar kendaraan dapat dipertahankan identitas pelacakannya sepanjang beberapa \textit{frame} berturut-turut. Durasi pelacakan terpanjang sebesar 419 \textit{frame} menunjukkan objek tetap berada dalam kondisi terlacak selama melintasi area pengamatan. Pada kondisi lalu lintas padat, sistem masih mampu menangani hingga 11 objek secara bersamaan dalam satu \textit{frame}.
+Tabel~\ref{tab:bytetrack-basic-stats} menunjukkan bahwa sebagian besar kendaraan dapat dipertahankan identitas pelacakannya sepanjang beberapa \textit{frame} berturut-turut. Durasi pelacakan terpanjang sebesar 419 \textit{frame} menunjukkan objek tetap berada dalam kondisi terlacak selama melintasi area pengamatan. Pada kondisi lalu lintas padat, sistem masih mampu menangani hingga 11 objek secara bersamaan dalam satu \textit{frame}. Rata-rata 3,36 objek aktif dengan puncak 11 objek menunjukkan beban pelacakan tergolong ringan, sementara durasi terpanjang 419 \textit{frame} menegaskan identitas dapat bertahan utuh selama objek melintasi area pengamatan.
 
 Ketahanan pelacakan terhadap oklusi ditampilkan pada Gambar~\ref{fig:occlusion-handling}. Seorang pengendara sempat tertutup kendaraan lain selama beberapa \textit{frame}, kemudian kembali muncul dengan \texttt{Track ID} yang tetap sama.
 
@@ -388,7 +388,7 @@ Ketahanan pelacakan terhadap oklusi ditampilkan pada Gambar~\ref{fig:occlusion-h
 \label{fig:occlusion-handling}
 \end{figure}
 
-Gambar~\ref{fig:occlusion-handling} memperlihatkan bahwa identitas pelacakan tetap dipertahankan ketika objek mengalami oklusi sementara. Pada urutan \textit{frame} awal, pengendara masih terlihat jelas di area pengamatan. Ketika kendaraan lain melintas dan menutupi sebagian objek, sistem tetap mempertahankan asosiasi identitas pelacakan. Setelah objek kembali terlihat penuh, \texttt{Track ID} yang digunakan tetap sama dengan sebelum terjadi oklusi.
+Gambar~\ref{fig:occlusion-handling} memperlihatkan bahwa identitas pelacakan tetap dipertahankan ketika objek mengalami oklusi sementara. Pada urutan \textit{frame} awal, pengendara masih terlihat jelas di area pengamatan. Ketika kendaraan lain melintas dan menutupi sebagian objek, sistem tetap mempertahankan asosiasi identitas pelacakan. Setelah objek kembali terlihat penuh, \texttt{Track ID} yang digunakan tetap sama dengan sebelum terjadi oklusi. Ketahanan terhadap oklusi sesaat ini menjaga satu objek agar tidak terhitung sebagai dua identitas berbeda pada saat penyaringan.
 
 Selektivitas filter berlapis pada 3.001 \textit{frame} dirangkum pada Tabel~\ref{tab:filtering-funnel}. Jumlah kandidat turun dari 9.544 deteksi mentah menjadi 2 \textit{event} pelanggaran unik setelah seluruh tahap penyaringan diterapkan.
 
@@ -417,7 +417,7 @@ Tabel~\ref{tab:filtering-funnel} memperlihatkan proses reduksi kandidat pelangga
 
 Penyaringan terbesar terjadi pada tahap filter spasial IoA, yaitu dari 1.602 kandidat menjadi 35 kandidat valid. Tahap ini membuang 1.567 deteksi yang tidak memiliki keterkaitan spasial memadai dengan objek sepeda motor. Setelah konfirmasi temporal minimal tiga \textit{frame}, jumlah kandidat kembali turun menjadi 25 deteksi.
 
-Tahap akhir \textit{deduplication} per-\textit{track} menghasilkan 2 \textit{event} pelanggaran unik dari keseluruhan 3.001 \textit{frame} video. Dengan demikian, hanya 0,02\% kandidat awal yang dipertahankan sebagai pelanggaran akhir setelah seluruh lapisan filter diterapkan.
+Tahap akhir \textit{deduplication} per-\textit{track} menghasilkan 2 \textit{event} pelanggaran unik dari keseluruhan 3.001 \textit{frame} video. Dengan demikian, hanya 0,02\% kandidat awal yang dipertahankan sebagai pelanggaran akhir setelah seluruh lapisan filter diterapkan. Pola corong ini menempatkan filter spasial IoA sebagai penyaring paling tajam, sedangkan rangkaian lima tahap secara bersama menekan 9.544 deteksi mentah menjadi 2 \textit{event} unik.
 \subsubsection{Kinerja Sisi Tepi dan Lapisan Distribusi}
 \label{subsubsec:hasil-edge}
 
@@ -465,7 +465,7 @@ Dinamika \textit{throughput} \textit{pipeline} sepanjang 3.001 \textit{frame} di
 \label{fig:fps-timeseries-evidence}
 \end{figure}
 
-Gambar~\ref{fig:fps-timeseries-evidence} memperlihatkan bahwa garis \textit{throughput} cenderung mendekati garis rerata 18,9 FPS di hampir seluruh durasi pengujian. Tidak terlihat penurunan performa secara progresif meskipun jumlah \textit{frame} yang diproses mencapai lebih dari tiga ribu \textit{frame}. Fluktuasi kecil masih muncul pada beberapa titik pengukuran, namun perubahan tersebut tetap berada dalam rentang stabil.
+Gambar~\ref{fig:fps-timeseries-evidence} memperlihatkan bahwa garis \textit{throughput} cenderung mendekati garis rerata 18,9 FPS di hampir seluruh durasi pengujian. Tidak terlihat penurunan performa secara progresif meskipun jumlah \textit{frame} yang diproses mencapai lebih dari tiga ribu \textit{frame}. Fluktuasi kecil masih muncul pada beberapa titik pengukuran, namun perubahan tersebut tetap berada dalam rentang stabil. Rerata 18,9 FPS yang bertahan tanpa tren menurun memperlihatkan \textit{pipeline} sanggup memproses video mendekati waktu nyata sepanjang pengujian.
 
 Rincian latensi per komponen \textit{pipeline} disajikan pada Tabel~\ref{tab:latency-decomposition}. Inferensi YOLOv8 memiliki rerata latensi 51,39 milidetik dengan persentase kontribusi sebesar 96,8\% terhadap total waktu pemrosesan sistem. Modul pelacakan ByteTrack mencatat latensi 1,62 milidetik atau 3,1\%, sedangkan modul \textit{filtering} hanya memerlukan 0,05 milidetik atau 0,1\% dari total latensi.
 
@@ -488,7 +488,7 @@ Filter pelanggaran & 0,05 & 0,07 & 0,05 & 0,1\% \\
 \end{tabularx}
 \end{table}
 
-Tabel~\ref{tab:latency-decomposition} menunjukkan bahwa sebagian besar waktu pemrosesan sistem berada pada tahap inferensi model deteksi. Nilai P95 sistem tercatat sebesar 57,52 milidetik dengan deviasi standar total 3,23 milidetik. Dibandingkan modul inferensi, latensi ByteTrack dan modul \textit{filtering} relatif kecil sehingga kontribusinya terhadap total waktu pemrosesan tidak signifikan.
+Tabel~\ref{tab:latency-decomposition} menunjukkan bahwa sebagian besar waktu pemrosesan sistem berada pada tahap inferensi model deteksi. Nilai P95 sistem tercatat sebesar 57,52 milidetik dengan deviasi standar total 3,23 milidetik. Dibandingkan modul inferensi, latensi ByteTrack dan modul \textit{filtering} relatif kecil sehingga kontribusinya terhadap total waktu pemrosesan tidak signifikan. Kontras porsi 96,8\% berbanding 3,1\% dan 0,1\% menegaskan inferensi sebagai komponen penentu latensi, sedangkan pelacakan dan penyaringan hampir tidak menambah beban waktu.
 
 Lapisan distribusi diuji dengan mengirim 500 \textit{event} JSON ke topik \texttt{video.violations} yang dibagi ke tiga partisi. Ringkasan hasil pengujian ditampilkan pada Tabel~\ref{tab:kafka-throughput}. Seluruh 500 pesan berhasil dikirim tanpa kegagalan dengan konfigurasi \texttt{acks=all} aktif.
 
@@ -510,7 +510,7 @@ Latensi median transmisi & \textbf{2,65 milidetik} \\
 \end{tabular}
 \end{table}
 
-Tabel~\ref{tab:kafka-throughput} memperlihatkan bahwa \textit{throughput producer} mencapai 11.485 pesan per detik dengan \textit{bandwidth} rata-rata 3,76 MB per detik. Ukuran rata-rata setiap pesan tercatat sebesar 335,6 \textit{byte}, sedangkan median latensi transmisi berada pada 2,65 milidetik. Seluruh pesan diterima tanpa kehilangan data selama proses pengiriman berlangsung.
+Tabel~\ref{tab:kafka-throughput} memperlihatkan bahwa \textit{throughput producer} mencapai 11.485 pesan per detik dengan \textit{bandwidth} rata-rata 3,76 MB per detik. Ukuran rata-rata setiap pesan tercatat sebesar 335,6 \textit{byte}, sedangkan median latensi transmisi berada pada 2,65 milidetik. Seluruh pesan diterima tanpa kehilangan data selama proses pengiriman berlangsung. Keberhasilan kirim 100,0\% pada laju 11.485 pesan per detik menunjukkan lapisan distribusi tidak menjadi penghambat aliran \textit{event}.
 
 Dinamika \textit{micro-batch} Spark Structured Streaming pada \textit{trigger interval} 10 detik dirangkum pada Tabel~\ref{tab:spark-microbatch}. Batch 1 menerima lonjakan 50 baris dan selesai diproses dalam 3.779 milidetik. Batch 8 dan Batch 10 masing-masing memproses 20 dan 30 baris dengan waktu pemrosesan sekitar 1.705--1.706 milidetik.
 
@@ -533,7 +533,7 @@ Batch 2--7 & \textit{Empty / Idle} & 0 baris & 0 ms & 0 baris/detik \\
 \end{tabularx}
 \end{table}
 
-Tabel~\ref{tab:spark-microbatch} menunjukkan bahwa sebagian besar interval pemrosesan berada pada kondisi \textit{idle} tanpa data masuk. Ketika terjadi lonjakan data pada Batch 1, sistem masih mampu menyelesaikan pemrosesan dalam waktu di bawah empat detik. Pada Batch 8 dan Batch 10, waktu proses berada di kisaran 1,7 detik dengan laju pemrosesan masing-masing 11,7 dan 17,6 baris per detik.
+Tabel~\ref{tab:spark-microbatch} menunjukkan bahwa sebagian besar interval pemrosesan berada pada kondisi \textit{idle} tanpa data masuk. Ketika terjadi lonjakan data pada Batch 1, sistem masih mampu menyelesaikan pemrosesan dalam waktu di bawah empat detik. Pada Batch 8 dan Batch 10, waktu proses berada di kisaran 1,7 detik dengan laju pemrosesan masing-masing 11,7 dan 17,6 baris per detik. Pola \textit{idle} yang diselingi lonjakan singkat memperlihatkan beban pemrosesan analitik bersifat sporadis dan selalu selesai jauh di bawah \textit{trigger interval} 10 detik.
 
 \subsection{Hasil Implementasi \textit{Data Mart} dan Visualisasi Analitik}
 \label{subsec:hasil-datamart}
@@ -599,7 +599,7 @@ Volume fisik tabel fakta dan tabel dimensi dirangkum pada Tabel~\ref{tab:dwh-vol
 
 Tabel \texttt{dim\_date} memuat 5.844 baris dengan ukuran 424 kB, sedangkan \texttt{dim\_camera} dan \texttt{dim\_violation\_type} masing-masing hanya berukuran 8.192 byte. Perbedaan ukuran tersebut menunjukkan bahwa sebagian besar ruang penyimpanan ditempati oleh data kejadian operasional pada tabel fakta.
 
-Distribusi volume yang timpang antara tabel fakta dan tabel dimensi merupakan karakteristik umum pada arsitektur \textit{data warehouse}. Tabel fakta menyimpan histori kejadian dalam jumlah besar, sedangkan tabel dimensi berfungsi sebagai referensi kontekstual dengan ukuran relatif kecil dan stabil. Pada implementasi ini, pola tersebut terlihat jelas dari dominasi ukuran \texttt{fact\_violations} terhadap keseluruhan struktur penyimpanan.
+Distribusi volume yang timpang antara tabel fakta dan tabel dimensi merupakan karakteristik umum pada arsitektur \textit{data warehouse}. Tabel fakta menyimpan histori kejadian dalam jumlah besar, sedangkan tabel dimensi berfungsi sebagai referensi kontekstual dengan ukuran relatif kecil dan stabil. Pada implementasi ini, pola tersebut terlihat jelas dari dominasi ukuran \texttt{fact\_violations} terhadap keseluruhan struktur penyimpanan. Volume 2.301.002 baris pada tabel fakta inilah yang menjadi beban nyata ketika kinerja kueri diukur pada bagian berikutnya.
 
 \begin{table}[htbp]
 \centering
@@ -632,7 +632,7 @@ Rincian waktu eksekusi setiap kueri disajikan pada Tabel~\ref{tab:dwh-query-deta
 
 Sebelas kueri pada \textit{tier} 2 berada pada rentang 103 ms hingga 1.024 ms. Kelompok ini didominasi oleh kueri agregasi periodik, distribusi temporal, serta \textit{join} terhadap tabel dimensi. BM-11 yang melibatkan \texttt{JOIN dim\_camera} mencatat waktu tertinggi pada kelompok sedang, yaitu 1.024,72 ms.
 
-Dua kueri pada \textit{tier} 3 membutuhkan waktu lebih dari 6 detik. BM-20 yang menghitung statistik ringkas tahunan selesai dalam 6.559,35 ms, sedangkan BM-12 dengan \textit{window function} geospasial membutuhkan 6.949,09 ms. Kedua kueri tersebut memiliki kompleksitas agregasi dan pemindaian data yang lebih besar dibanding kueri lain.
+Dua kueri pada \textit{tier} 3 membutuhkan waktu lebih dari 6 detik. BM-20 yang menghitung statistik ringkas tahunan selesai dalam 6.559,35 ms, sedangkan BM-12 dengan \textit{window function} geospasial membutuhkan 6.949,09 ms. Kedua kueri tersebut memiliki kompleksitas agregasi dan pemindaian data yang lebih besar dibanding kueri lain. Sembilan kueri \textit{tier} cepat menopang kebutuhan \textit{dashboard real-time} di bawah 50 ms, sedangkan dua kueri \textit{tier} berat di atas 6 detik menjadi kontras ekstrem yang hanya dipakai untuk ringkasan tahunan dan analisis geospasial.
 
 \begin{table}[htbp]
 \centering
@@ -739,7 +739,7 @@ Kinerja model dan stabilitas infrastruktur selama 10 jam operasional dirangkum p
 \label{fig:grafana-evaluasi-sistem}
 \end{figure}
 
-Grafik evaluasi pada Gambar~\ref{fig:grafana-evaluasi-sistem} memperlihatkan hubungan antara kepadatan beban operasional dan respons sistem selama pengujian berlangsung. Nilai \textit{confidence} model relatif stabil pada kisaran menengah hingga tinggi sepanjang hari operasional, tanpa penurunan tajam yang berlangsung lama. Pada sisi infrastruktur, lonjakan latensi hanya muncul pada beberapa interval ketika jumlah kejadian meningkat secara bersamaan. Setelah periode puncak terlewati, latensi kembali turun mendekati rerata sistem. Pola ini menunjukkan bahwa arsitektur pemrosesan masih mampu menjaga kestabilan inferensi dan pengiriman data meskipun menerima beban yang berubah-ubah sepanjang hari operasional.
+Grafik evaluasi pada Gambar~\ref{fig:grafana-evaluasi-sistem} memperlihatkan hubungan antara kepadatan beban operasional dan respons sistem selama pengujian berlangsung. Nilai \textit{confidence} model relatif stabil pada kisaran menengah hingga tinggi sepanjang hari operasional, tanpa penurunan tajam yang berlangsung lama. Pada sisi infrastruktur, lonjakan latensi hanya muncul pada beberapa interval ketika jumlah kejadian meningkat secara bersamaan. Setelah periode puncak terlewati, latensi kembali turun mendekati rerata sistem. Pola ini menunjukkan bahwa arsitektur pemrosesan masih mampu menjaga kestabilan inferensi dan pengiriman data meskipun menerima beban yang berubah-ubah sepanjang hari operasional. Dengan kelima panel tersebut, lapisan visualisasi mengubah 113 kejadian mentah menjadi informasi jam rawan yang langsung terbaca operator tanpa menyentuh tabel basis data.
 
 % ============================================================
 \section{Pembahasan}
