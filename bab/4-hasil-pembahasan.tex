@@ -70,7 +70,7 @@ Citra sebelum dan sesudah augmentasi ditampilkan pada Gambar~\ref{fig:aug-rotasi
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=1\textwidth]{gambar/aug_rotasi.jpg}
+  \includegraphics[width=1\textwidth]{gambar/aug_rotasi.png}
   \caption{Contoh augmentasi rotasi pada rentang $-8^\circ$ sampai $+8^\circ$.}
   \label{fig:aug-rotasi}
 \end{figure}
@@ -79,7 +79,7 @@ Citra hasil rotasi pada Gambar~\ref{fig:aug-rotasi} menunjukkan perubahan orient
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.80\textwidth]{gambar/aug_shear.jpg}
+  \includegraphics[width=0.80\textwidth]{gambar/aug_shear.png}
   \caption{Contoh augmentasi \textit{shear} pada sumbu X dan Y dengan nilai $\pm 0{,}2$.}
   \label{fig:aug-shear}
 \end{figure}
@@ -88,7 +88,7 @@ Gambar~\ref{fig:aug-shear} menunjukkan hasil transformasi \textit{shear} pada su
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.95\textwidth]{gambar/aug_exposure.jpg}
+  \includegraphics[width=0.95\textwidth]{gambar/aug_exposure.png}
   \caption{Contoh augmentasi \textit{exposure} pada rentang $-10\%$ sampai $+10\%$.}
   \label{fig:aug-exposure}
 \end{figure}
@@ -97,7 +97,7 @@ Pada Gambar~\ref{fig:aug-exposure}, perubahan nilai \textit{exposure} menghasilk
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.75\textwidth]{gambar/aug_blur.jpg}
+  \includegraphics[width=0.75\textwidth]{gambar/aug_blur.png}
   \caption{Contoh augmentasi \textit{Gaussian blur} dengan \textit{kernel} 1 piksel.}
   \label{fig:aug-blur}
 \end{figure}
@@ -106,7 +106,7 @@ Hasil augmentasi \textit{Gaussian blur} pada Gambar~\ref{fig:aug-blur} menunjukk
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\textwidth]{gambar/aug_noise.jpg}
+  \includegraphics[width=0.8\textwidth]{gambar/aug_noise.png}
   \caption{Contoh augmentasi \textit{additive noise} sebesar 1\% dari total piksel.}
   \label{fig:aug-noise}
 \end{figure}
@@ -120,7 +120,7 @@ Dataset yang sudah diperluas dibagi dengan rasio 82\% pelatihan (699 citra), 9\%
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{gambar/train_los.jpg}
+\includegraphics[width=\textwidth]{gambar/train_loss.jpg}
 \caption{Kurva \textit{train loss} model YOLOv8 selama 300 \textit{epoch}: (A) \texttt{train/box\_loss}, (B) \texttt{train/cls\_loss}, dan (C) \texttt{train/dfl\_loss}.}
 \label{fig:train-loss}
 \end{figure}
@@ -184,7 +184,7 @@ Tabel~\ref{tab:metrik-test-objek} menyajikan AP@50 tiap kelas beserta nilai agre
 \label{subsec:hasil-pipeline}
 % ------------------------------------------------------------
 
-Sub-bab ini melaporkan keluaran pengujian \textit{pipeline} ketika diuji pada potongan 3.001 \textit{frame} video gerbang utama. Paparan disusun mengikuti aliran data: arsitektur beserta keluaran tiap tahap pada \textit{frame} awal, persistensi pelacakan dengan selektivitas rangkaian filter, kemudian kinerja sisi \textit{edge} dan lapisan distribusi. Susunan berurutan ini menunjukkan bagaimana piksel mentah berubah bertahap menjadi catatan peristiwa, sekaligus menjaga paralel dengan rancangan \textit{pipeline} pada Bab~\ref{chap:metodologi}.
+Sub-bab ini melaporkan keluaran pengujian \textit{pipeline} ketika diuji pada potongan 3.001 \textit{frame} video gerbang utama. Paparan disusun mengikuti aliran data: arsitektur beserta keluaran tiap tahap pada \textit{frame} awal, persistensi pelacakan dengan selektivitas rangkaian filter, kemudian kinerja pemrosesan lokal dan lapisan distribusi. Susunan berurutan ini menunjukkan bagaimana piksel mentah berubah bertahap menjadi catatan peristiwa, sekaligus menjaga paralel dengan rancangan \textit{pipeline} pada Bab~\ref{chap:metodologi}.
 
 \subsubsection{Alur \textit{Pipeline} dan Keluaran \textit{Frame} Awal}
 \label{subsubsec:hasil-arsitektur}
@@ -246,7 +246,7 @@ Sub-bab ini melaporkan keluaran pengujian \textit{pipeline} ketika diuji pada po
 
 \end{tikzpicture}
 }%
-\caption{Alur data pada \textit{pipeline} pemrosesan tepi dari \textit{frame} mentah hingga paket JSON.}
+\caption{Alur data pada \textit{pipeline} pemrosesan lokal dari \textit{frame} mentah hingga paket JSON.}
 \label{fig:pipeline-flow}
 \end{figure}
 
@@ -422,7 +422,7 @@ Tabel~\ref{tab:filtering-funnel} menunjukkan proses reduksi kandidat pelanggaran
 Penyaringan terbesar terjadi pada tahap filter spasial IoA, yaitu dari 1.602 kandidat menjadi 35 kandidat valid. Tahap ini membuang 1.567 deteksi yang tidak memiliki keterkaitan spasial memadai dengan objek sepeda motor. Setelah konfirmasi temporal minimal tiga \textit{frame}, jumlah kandidat kembali turun menjadi 25 deteksi.
 
 Tahap akhir \textit{deduplication} per-\textit{track} menghasilkan 2 \textit{event} pelanggaran unik dari keseluruhan 3.001 \textit{frame} video. Dengan demikian, hanya 0,02\% kandidat awal yang dipertahankan sebagai pelanggaran akhir setelah seluruh lapisan filter diterapkan. Pola penyaringan ini menunjukkan filter spasial IoA sebagai penyaring terbesar, sedangkan rangkaian lima tahap secara bersama mengurangi 9.544 deteksi mentah menjadi 2 \textit{event} unik.
-\subsubsection{Kinerja \textit{Edge} dan Distribusi Data}
+\subsubsection{Kinerja Pemrosesan Lokal dan Distribusi Data}
 \label{subsubsec:hasil-edge}
 
 Dinamika \textit{throughput} \textit{pipeline} sepanjang 3.001 \textit{frame} ditampilkan pada Gambar~\ref{fig:fps-timeseries-evidence}. Rerata \textit{throughput} tercatat 18,9 FPS dan pola garis relatif stabil sejak awal hingga akhir pengujian. Nilai FPS terendah tercatat sebesar 17,02 FPS pada awal pemrosesan, sedangkan nilai tertinggi mencapai 20,03 FPS pada rentang pertengahan video. Sebagian besar pengukuran berada di kisaran 18--19 FPS tanpa fluktuasi besar.
@@ -790,7 +790,7 @@ Tahap 4 yang membuang 28,6\% dari kandidat masuk justru menunjukkan filter tempo
 
 Rerata \textit{throughput} 18,9 FPS pada Gambar~\ref{fig:fps-timeseries-evidence} berada di atas kebutuhan CCTV kampus yang umumnya beroperasi pada 10--15 FPS, sehingga sistem menyisakan margin untuk menampung lonjakan kepadatan tanpa mengorbankan ketepatan waktu pencatatan. Pola garis yang relatif rata tanpa tren penurunan menandakan tidak ada kebocoran memori atau akumulasi beban yang membebani CPU seiring waktu. Pada dekomposisi latensi (Tabel~\ref{tab:latency-decomposition}), inferensi YOLOv8 mendominasi 96,8\% biaya pemrosesan, sedangkan logika pelacakan dan validasi spasial-temporal hampir tidak terasa di latensi. Konsekuensi rekayasanya jelas: optimasi inferensi YOLOv8 berarti optimasi \textit{pipeline} secara keseluruhan, sedangkan penambahan rangkaian filter tidak akan mengganggu waktu pemrosesan sistem. Latensi total 53 milidetik tergolong responsif untuk pemantauan \textit{near real-time} dan masih jauh dari ambang yang dapat dirasakan operator \textit{dashboard}.
 
-Konfigurasi \texttt{acks=all} pada Apache Kafka (Tabel~\ref{tab:kafka-throughput}) memastikan setiap pesan menunggu konfirmasi dari seluruh replika sebelum dianggap diterima, sebuah jaminan reliabilitas yang lazim direkomendasikan pada arsitektur \textit{event-driven}~\cite{kleppmann2017designing}. Kapasitas 11.485 pesan per detik dengan latensi median 2,65 milidetik menyediakan margin yang sangat lebar dibandingkan kebutuhan operasional gerbang kampus yang berkisar pada beberapa pelanggaran per menit. Kunci partisi \texttt{camera\_id:track\_id} dipilih agar urutan pesan per kamera tetap konsisten meski partisi diproses paralel. Karena lapisan distribusi dipisah dari sisi tepi melalui antrean Kafka, lonjakan trafik di gerbang tidak langsung membebani sistem perekam maupun lapisan ETL di belakangnya.
+Konfigurasi \texttt{acks=all} pada Apache Kafka (Tabel~\ref{tab:kafka-throughput}) memastikan setiap pesan menunggu konfirmasi dari seluruh replika sebelum dianggap diterima, sebuah jaminan reliabilitas yang lazim direkomendasikan pada arsitektur \textit{event-driven}~\cite{kleppmann2017designing}. Kapasitas 11.485 pesan per detik dengan latensi median 2,65 milidetik menyediakan margin yang sangat lebar dibandingkan kebutuhan operasional gerbang kampus yang berkisar pada beberapa pelanggaran per menit. Kunci partisi \texttt{camera\_id:track\_id} dipilih agar urutan pesan per kamera tetap konsisten meski partisi diproses paralel. Karena lapisan distribusi dipisah dari pemrosesan lokal melalui antrean Kafka, lonjakan trafik di gerbang tidak langsung membebani sistem perekam maupun lapisan ETL di belakangnya.
 
 Spark Structured Streaming sebagai lapisan ETL terakhir (Tabel~\ref{tab:spark-microbatch}) menuntaskan seluruh \textit{micro-batch} jauh di bawah jendela 10 detik, sehingga tidak terbentuk antrean menumpuk antar-\textit{batch}. \textit{Watermark} 30 detik dipilih supaya \textit{event} yang datang terlambat akibat \textit{retry} di hulu tetap dapat di-\textit{dedup} tanpa menahan \textit{batch} terlalu lama. Hasilnya, data dari kamera sampai \textit{data mart} bergerak dalam latensi di bawah 10 detik per siklus, cukup untuk kebutuhan analitik \textit{near real-time}~\cite{zaharia2018structured}. Dengan keempat bukti tersebut, sistem mampu menyatukan deteksi, pelacakan, validasi spasial, validasi temporal, distribusi pesan, dan ETL aliran menjadi satu kesatuan \textit{pipeline} yang menghasilkan \textit{event stream} pelanggaran helm tervalidasi dari kamera sampai \textit{data mart}. Kebaruan susunan ini terletak pada rangkaian filter yang memangkas 9.544 deteksi mentah menjadi 2 \textit{event} unik tanpa membebani latensi sistem, sebab reduksi terberat justru ditanggung tahap-tahap berbasis logika yang nyaris tanpa biaya komputasi. Aliran \textit{event} yang sudah ringkas dan tervalidasi inilah yang kemudian mengisi \textit{data mart} dan menentukan kualitas analitik pada pembahasan berikutnya.
 
@@ -817,4 +817,4 @@ Akumulasi pelanggaran pada Gambar~\ref{fig:grafana-akumulasi} menunjukkan distri
 
 Peta panas pada Gambar~\ref{fig:grafana-heatmap-real} melengkapi daftar jam tersibuk: peringkat memberi tahu jam mana yang ramai, sementara peta panas memberi tahu kuartal mana di dalam jam tersebut yang paling kritis. Bagi unit keamanan kampus, kombinasi kedua panel cukup untuk memutuskan penempatan personel patroli pada jendela 30 menit yang spesifik, bukan sekadar slot jam yang lebar. Area kosong pada matriks dipertahankan untuk menunjukkan kontras dengan zona puncak, sehingga \textit{hotspot} yang muncul di kolom \texttt{:45} dan \texttt{:00} pada jam 14 dan 15 terlihat tanpa perlu legenda tambahan.
 
-Stabilitas inferensi dan infrastruktur pada Gambar~\ref{fig:grafana-evaluasi-sistem} menunjukkan sistem tetap andal saat beban data meningkat. Rerata keyakinan model 79,9\% dengan batas bawah 51,2\% menandakan YOLOv8 tidak mengalami penurunan akurasi saat kepadatan dan oklusi antar-pengendara meningkat akibat cuaca. Rerata latensi 49 milidetik dengan maksimum 124 milidetik pada beban puncak masih dalam rentang \textit{near real-time} yang dibutuhkan pemantauan CCTV operasional, dengan selisih rerata--maksimum sekitar 2,5 kali lipat yang menunjukkan sebaran nilai ekstrem masih dalam batas wajar. Stabilitas tersebut bersumber dari arsitektur yang memisahkan inferensi YOLOv8 di sisi tepi dari distribusi pesan Kafka dan pemrosesan \textit{micro-batch} Spark: jalur Kafka menampung lonjakan data, sehingga lonjakan trafik di gerbang tidak langsung mempengaruhi waktu respons \textit{pipeline} inferensi. Dengan demikian, \textit{data mart} pelanggaran helm dapat dioperasikan secara berkelanjutan tanpa perlu meningkatkan kapasitas perangkat keras setiap kali aktivitas kampus berubah. Ketiga lapis pembahasan ini menutup alur pembahasan: model yang seimbang menghasilkan deteksi tepat, \textit{pipeline} berlapis menyaringnya menjadi \textit{event} tervalidasi, dan \textit{data mart} mengubah data tersebut menjadi pola jam rawan yang dapat ditindaklanjuti unit keamanan kampus. Kontribusi penelitian terletak pada integrasi deteksi, pelacakan, penyaringan, dan analitik menjadi satu sistem pendukung keputusan pelanggaran helm yang berjalan dari kamera hingga \textit{dashboard}.
+Stabilitas inferensi dan infrastruktur pada Gambar~\ref{fig:grafana-evaluasi-sistem} menunjukkan sistem tetap andal saat beban data meningkat. Rerata keyakinan model 79,9\% dengan batas bawah 51,2\% menandakan YOLOv8 tidak mengalami penurunan akurasi saat kepadatan dan oklusi antar-pengendara meningkat akibat cuaca. Rerata latensi 49 milidetik dengan maksimum 124 milidetik pada beban puncak masih dalam rentang \textit{near real-time} yang dibutuhkan pemantauan CCTV operasional, dengan selisih rerata--maksimum sekitar 2,5 kali lipat yang menunjukkan sebaran nilai ekstrem masih dalam batas wajar. Stabilitas tersebut bersumber dari arsitektur yang memisahkan inferensi YOLOv8 dari distribusi pesan Kafka dan pemrosesan \textit{micro-batch} Spark: jalur Kafka menampung lonjakan data, sehingga lonjakan trafik di gerbang tidak langsung mempengaruhi waktu respons \textit{pipeline} inferensi. Dengan demikian, \textit{data mart} pelanggaran helm dapat dioperasikan secara berkelanjutan tanpa perlu meningkatkan kapasitas perangkat keras setiap kali aktivitas kampus berubah. Ketiga lapis pembahasan ini menutup alur pembahasan: model yang seimbang menghasilkan deteksi tepat, \textit{pipeline} berlapis menyaringnya menjadi \textit{event} tervalidasi, dan \textit{data mart} mengubah data tersebut menjadi pola jam rawan yang dapat ditindaklanjuti unit keamanan kampus. Kontribusi penelitian terletak pada integrasi deteksi, pelacakan, penyaringan, dan analitik menjadi satu sistem pendukung keputusan pelanggaran helm yang berjalan dari kamera hingga \textit{dashboard}.

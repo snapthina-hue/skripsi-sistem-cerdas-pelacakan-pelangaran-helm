@@ -100,7 +100,7 @@ Arsitektur berlapis digunakan karena sistem pelacakan pelanggaran helm tidak han
 \begin{enumerate}[a.]
   \item \textit{Data Source}: menyuplai aliran video CCTV beserta identitas kamera, resolusi, dan posisi geospasial yang menjadi konteks setiap \textit{frame}.
 
-  \item \textit{Ingestion \& Edge Intelligence}: menangani akuisisi \textit{frame}, pra-pemrosesan ringan, serta penambahan stempel waktu dan metadata teknis sebelum aliran diteruskan ke \textit{message broker}.
+  \item \textit{Ingestion \& Inference}: menangani akuisisi \textit{frame}, pra-pemrosesan ringan, serta penambahan stempel waktu dan metadata teknis sebelum aliran diteruskan ke \textit{message broker}.
 
   \item \textit{Buffering}: memakai Apache Kafka sebagai \textit{message broker} sehingga aliran peristiwa tetap andal, skalabel, dan berurutan per kamera ketika proses hilir mengalami keterlambatan.
 
@@ -121,11 +121,11 @@ Secara keseluruhan, keenam komponen tersebut membentuk alur kerja dari video men
   \label{fig:architecture}
 \end{figure}
 \section{Perancangan Model YOLOv8}
-Bagian ini menjelaskan perancangan model deteksi, yaitu proses pelatihan YOLOv8 sebagai komponen deteksi objek pada lapisan \textit{Ingestion \& Edge Intelligence}. Integrasi ByteTrack pada tahap inferensi dibahas terpisah pada Sub-bab~\ref{sec:logika-deteksi} bersama logika filter spasial-temporal lainnya.
+Bagian ini menjelaskan perancangan model deteksi, yaitu proses pelatihan YOLOv8 sebagai komponen deteksi objek pada lapisan \textit{Ingestion \& Inference}. Integrasi ByteTrack pada tahap inferensi dibahas terpisah pada Sub-bab~\ref{sec:logika-deteksi} bersama logika filter spasial-temporal lainnya.
 
 \subsection{Pelatihan Model YOLOv8n}
 \label{subsec:pelatihan-yolov8n}
-Penelitian ini memilih arsitektur YOLOv8n sebagai model deteksi objek berdasarkan tiga pertimbangan teknis. Pertama, YOLOv8n adalah varian paling ringan pada keluarga YOLOv8 yang dirilis Ultralytics pada Januari 2023 dengan sekitar 3,2 juta parameter dan beban komputasi 8,7 GFLOPs pada resolusi $640 \times 640$ piksel \cite{jocher2023yolo,terven2023yoloreview}. Ukuran model ini cocok untuk inferensi sisi tepi pada perangkat tanpa akselerator GPU, termasuk laptop pengujian di gerbang Itera. Kedua, YOLOv8 meninggalkan pendekatan berbasis \textit{anchor box} yang membutuhkan kalibrasi tambahan pada objek dengan rasio aspek beragam, lalu menggantinya dengan \textit{decoupled anchor-free detection head} yang langsung memprediksi titik pusat objek \cite{yaseen2024yolov8indepthexplorationinternal}. Pendekatan tanpa \textit{anchor} ini membantu deteksi atribut kecil seperti helm yang ukurannya relatif terhadap badan motor selalu bervariasi. Ketiga, YOLOv8n memakai \textit{backbone} CSPDarknet dengan modul C2f untuk mengekstrak fitur visual secara efisien, lalu menghubungkannya ke \textit{neck} yang menggabungkan \textit{Feature Pyramid Network} (FPN) dan \textit{Path Aggregation Network} (PAN) sehingga objek pada beragam skala dapat dideteksi dalam satu kali \textit{forward pass} \cite{lenawala2023yolov8,terven2023yoloreview}. Ringkasan komponen arsitektur tersebut tersaji pada Tabel~\ref{tab:arsitektur-yolov8n}.
+Penelitian ini memilih arsitektur YOLOv8n sebagai model deteksi objek berdasarkan tiga pertimbangan teknis. Pertama, YOLOv8n adalah varian paling ringan pada keluarga YOLOv8 yang dirilis Ultralytics pada Januari 2023 dengan sekitar 3,2 juta parameter dan beban komputasi 8,7 GFLOPs pada resolusi $640 \times 640$ piksel \cite{jocher2023yolo,terven2023yoloreview}. Ukuran model ini cocok untuk inferensi lokal pada perangkat tanpa akselerator GPU, termasuk laptop pengujian di gerbang Itera. Kedua, YOLOv8 meninggalkan pendekatan berbasis \textit{anchor box} yang membutuhkan kalibrasi tambahan pada objek dengan rasio aspek beragam, lalu menggantinya dengan \textit{decoupled anchor-free detection head} yang langsung memprediksi titik pusat objek \cite{yaseen2024yolov8indepthexplorationinternal}. Pendekatan tanpa \textit{anchor} ini membantu deteksi atribut kecil seperti helm yang ukurannya relatif terhadap badan motor selalu bervariasi. Ketiga, YOLOv8n memakai \textit{backbone} CSPDarknet dengan modul C2f untuk mengekstrak fitur visual secara efisien, lalu menghubungkannya ke \textit{neck} yang menggabungkan \textit{Feature Pyramid Network} (FPN) dan \textit{Path Aggregation Network} (PAN) sehingga objek pada beragam skala dapat dideteksi dalam satu kali \textit{forward pass} \cite{lenawala2023yolov8,terven2023yoloreview}. Ringkasan komponen arsitektur tersebut tersaji pada Tabel~\ref{tab:arsitektur-yolov8n}.
 
 \begin{table}[H]
 \centering
@@ -245,7 +245,7 @@ Tahap ini berfokus pada pelatihan dan evaluasi model deteksi objek untuk mengena
 \subsection{Tahap 3: Konstruksi Pipeline Streaming Real-Time}
 Tahap ini membangun pipeline streaming terdistribusi untuk mengubah deteksi mentah menjadi \textit{event} terverifikasi.
 \begin{enumerate}[a.]
-\item {Integrasi inferensi dan pelacakan}: inferensi YOLOv8 diintegrasikan dengan pelacakan multiobjek ByteTrack pada sisi \textit{edge} untuk menjaga identitas kendaraan (\textit{Track ID}) secara persisten.
+\item {Integrasi inferensi dan pelacakan}: inferensi YOLOv8 diintegrasikan dengan pelacakan multiobjek ByteTrack secara lokal untuk menjaga identitas kendaraan (\textit{Track ID}) secara persisten.
 \item {Penerapan filter logika bertingkat}: metrik IoA digunakan untuk memvalidasi asosiasi antara pengendara dan sepeda motor, lalu konfirmasi temporal \textit{N-frame} diterapkan untuk mengurangi \textit{false positive} akibat oklusi sesaat.
 \item {Serialisasi dan transmisi pesan}: \textit{event} pelanggaran yang lolos validasi dikemas dalam \textit{payload} JSON dan dikirim melalui Apache Kafka dengan kunci partisi \texttt{camera\_id:track\_id} agar urutan kejadian tetap konsisten per kamera.
 \item {Pemrosesan ETL streaming}: Apache Spark Structured Streaming mengonsumsi \textit{event} dari Kafka, melakukan \textit{micro-batching}, deduplikasi berbasis \texttt{event\_id} dengan watermark 30 detik, serta ekstraksi dimensi waktu sebelum pemuatan \textit{idempotent} ke PostgreSQL melalui mekanisme \textit{upsert}.

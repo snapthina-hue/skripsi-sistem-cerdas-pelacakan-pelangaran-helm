@@ -86,7 +86,7 @@ sebagai berikut.
 \begin{enumerate}
   \item Bagaimana Mengembangkan, melatih, dan mengevaluasi model YOLOv8 untuk mendeteksi pengendara sepeda motor berhelm dan tanpa helm pada video CCTV kampus dengan akurasi yang terukur?
 
-  \item Bagaimana mengintegrasikan YOLOv8 dan ByteTrack pada pemrosesan tepi (\textit{edge processing}) serta mendistribusikan keluarannya melalui Apache Kafka dan Apache Spark Structured Streaming menjadi \textit{event stream} pelanggaran helm yang tervalidasi secara spasial (\textit{Intersection over Area}) dan temporal (\textit{N-Frame})?
+  \item Bagaimana mengintegrasikan YOLOv8 dan ByteTrack dalam satu \textit{pipeline} pemrosesan video lokal serta mendistribusikan keluarannya melalui Apache Kafka dan Apache Spark Structured Streaming menjadi \textit{event stream} pelanggaran helm yang tervalidasi secara spasial (\textit{Intersection over Area}) dan temporal (\textit{N-Frame})?
 
   \item Bagaimana merancang skema \textit{data mart} berbasis \textit{star schema} dan \textit{dashboard} analitik yang mengubah \textit{event stream} pelanggaran helm menjadi komponen Sistem Pendukung Keputusan (\textit{Decision Support System}) untuk mengidentifikasi pola spasiotemporal pelanggaran di Itera?
 \end{enumerate}
@@ -99,7 +99,7 @@ Tujuan penelitian dirumuskan sejajar dengan rumusan masalah sebagai berikut.
 \begin{enumerate}
   \item Mengembangkan, melatih, dan mengevaluasi YOLOv8 untuk mendeteksi pengendara sepeda motor berhelm dan tanpa helm pada lingkungan kampus dengan kinerja terukur melalui mAP@50, \textit{precision}, dan \textit{recall}.
 
-  \item Mengimplementasikan integrasi YOLOv8 dan ByteTrack pada pemrosesan tepi serta distribusi data melalui Apache Kafka dan Apache Spark Structured Streaming, dilengkapi filter \textit{Intersection over Area} dan konfirmasi temporal \textit{N-Frame}, untuk menghasilkan \textit{event stream} pelanggaran helm yang tervalidasi.
+  \item Mengimplementasikan integrasi YOLOv8 dan ByteTrack dalam satu \textit{pipeline} pemrosesan video lokal serta distribusi data melalui Apache Kafka dan Apache Spark Structured Streaming, dilengkapi filter \textit{Intersection over Area} dan konfirmasi temporal \textit{N-Frame}, untuk menghasilkan \textit{event stream} pelanggaran helm yang tervalidasi.
 
   \item Merancang dan mengimplementasikan \textit{data mart} berbasis \textit{star schema} pada PostgreSQL beserta \textit{dashboard} analitik berbasis Grafana untuk mengubah \textit{event stream} menjadi Sistem Pendukung Keputusan yang menggambarkan pola spasiotemporal pelanggaran helm di Itera.
 \end{enumerate}
