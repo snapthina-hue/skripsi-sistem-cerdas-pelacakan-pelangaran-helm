@@ -3,7 +3,7 @@
 \label{chap:metodologi}
 
 \section{Lingkungan Pengembangan}
-Pengembangan dan pengujian sistem dilakukan pada satu unit laptop dengan spesifikasi perangkat keras yang ditunjukkan pada Tabel~\ref{tab:spek-hardware}.
+Pengembangan dan pengujian sistem dilakukan pada satu unit laptop dengan spesifikasi perangkat keras yang ditunjukkan pada Tabel~\ref{tab:spek-hardware}. Sistem dibangun sebagai purwarupa (\textit{prototype}) yang berjalan penuh pada satu perangkat tersebut, bukan sebagai penyebaran lintas banyak komputer.
 
 \begin{table}[h]
   \centering
@@ -22,6 +22,8 @@ Pengembangan dan pengujian sistem dilakukan pada satu unit laptop dengan spesifi
     \bottomrule
   \end{tabular}
 \end{table}
+
+Layanan pendukung arsitektur Kappa, yaitu Apache Kafka beserta Zookeeper, Apache Spark (mode \textit{master} dan \textit{worker}), basis data PostgreSQL, dan Grafana, dijalankan sebagai kontainer Docker yang diorkestrasi melalui \textit{Docker Compose} dan saling terhubung pada satu jaringan \textit{bridge} internal. Adapun \textit{pipeline} deteksi (YOLOv8 dan ByteTrack) dijalankan secara \textit{native} menggunakan \textit{runtime} Python pada laptop yang sama. Pemisahan antarsubsistem, yaitu subsistem deteksi, mesin pemrosesan \textit{stream} (Spark), basis data, dan visualisasi Grafana, disimulasikan melalui kontainer dan jendela terminal yang berbeda pada satu perangkat. Dengan demikian, komunikasi yang pada sistem berskala nyata berlangsung antarperangkat di sini berlangsung antarlayanan di dalam satu perangkat. Konfigurasi \textit{master--worker} pada Spark juga merupakan simulasi klaster pemrosesan pada satu mesin, bukan klaster fisik multinode.
 
 \section{Deskripsi Data}
 Subbab ini menjelaskan data penelitian yang meliputi jenis dan sumber data, proses anotasi, dan strategi augmentasi. Uraian setiap aspek disajikan pada subsubbab berikutnya sebagai dasar penyusunan dataset dan evaluasi model.
@@ -111,7 +113,7 @@ Arsitektur berlapis digunakan karena sistem pelacakan pelanggaran helm tidak han
   \item \textit{Presentation}: menyajikan hasil analitik melalui \textit{dashboard} Grafana sebagai antarmuka pemantauan dan dasar pengambilan keputusan operasional.
 \end{enumerate}
 
-Secara keseluruhan, keenam komponen tersebut membentuk alur kerja dari video mentah menjadi informasi analitik yang siap digunakan. Kafka berperan sebagai penyangga agar aliran data tetap stabil, sedangkan Spark Structured Streaming memastikan data yang masuk ke penyimpanan sudah melalui proses validasi dan pengolahan awal. Hasil olahan disimpan dalam \textit{data mart} agar dapat ditampilkan secara ringkas melalui Grafana dan dimanfaatkan untuk pemantauan pelanggaran helm secara operasional.
+Secara keseluruhan, keenam komponen tersebut membentuk alur kerja dari video mentah menjadi informasi analitik yang siap digunakan. Kafka berperan sebagai penyangga agar aliran data tetap stabil, sedangkan Spark Structured Streaming memastikan data yang masuk ke penyimpanan sudah melalui proses validasi dan pengolahan awal. Hasil olahan disimpan dalam \textit{data mart} agar dapat ditampilkan secara ringkas melalui Grafana dan dimanfaatkan untuk pemantauan pelanggaran helm secara operasional. Pemisahan keenam lapisan ini bersifat logis: pada purwarupa, lapisan \textit{buffering}, \textit{stream processing}, \textit{persistence}, dan \textit{presentation} dikemas sebagai kontainer Docker, sedangkan lapisan \textit{ingestion} dan inferensi berjalan sebagai proses \textit{native}, semuanya pada satu laptop. Tiap lapisan dijalankan pada kontainer atau terminal terpisah untuk menyimulasikan komunikasi antarsubsistem, sehingga rancangan yang sama dapat dipindahkan ke beberapa perangkat fisik tanpa mengubah alur datanya.
 
 
 \begin{figure}[H]
@@ -125,7 +127,7 @@ Bagian ini menjelaskan perancangan model deteksi, yaitu proses pelatihan YOLOv8 
 
 \subsection{Pelatihan Model YOLOv8n}
 \label{subsec:pelatihan-yolov8n}
-Penelitian ini memilih arsitektur YOLOv8n sebagai model deteksi objek berdasarkan tiga pertimbangan teknis. Pertama, YOLOv8n adalah varian paling ringan pada keluarga YOLOv8 yang dirilis Ultralytics pada Januari 2023 dengan sekitar 3,2 juta parameter dan beban komputasi 8,7 GFLOPs pada resolusi $640 \times 640$ piksel \cite{jocher2023yolo,terven2023yoloreview}. Ukuran model ini cocok untuk inferensi lokal pada perangkat tanpa akselerator GPU, termasuk laptop pengujian di gerbang Itera. Kedua, YOLOv8 meninggalkan pendekatan berbasis \textit{anchor box} yang membutuhkan kalibrasi tambahan pada objek dengan rasio aspek beragam, lalu menggantinya dengan \textit{decoupled anchor-free detection head} yang langsung memprediksi titik pusat objek \cite{yaseen2024yolov8indepthexplorationinternal}. Pendekatan tanpa \textit{anchor} ini membantu deteksi atribut kecil seperti helm yang ukurannya relatif terhadap badan motor selalu bervariasi. Ketiga, YOLOv8n memakai \textit{backbone} CSPDarknet dengan modul C2f untuk mengekstrak fitur visual secara efisien, lalu menghubungkannya ke \textit{neck} yang menggabungkan \textit{Feature Pyramid Network} (FPN) dan \textit{Path Aggregation Network} (PAN) sehingga objek pada beragam skala dapat dideteksi dalam satu kali \textit{forward pass} \cite{lenawala2023yolov8,terven2023yoloreview}. Ringkasan komponen arsitektur tersebut tersaji pada Tabel~\ref{tab:arsitektur-yolov8n}.
+Penelitian ini memilih arsitektur YOLOv8n sebagai model deteksi objek berdasarkan tiga pertimbangan teknis. Pertama, YOLOv8n adalah varian paling ringan pada keluarga YOLOv8 yang dirilis Ultralytics pada Januari 2023 dengan sekitar 3,2 juta parameter dan beban komputasi 8,7 GFLOPs pada resolusi $640 \times 640$ piksel \cite{jocher2023yolo,terven2023yoloreview}. Ukuran model ini cocok untuk inferensi lokal pada perangkat tanpa akselerator GPU, termasuk laptop pengujian yang digunakan pada penelitian ini. Kedua, YOLOv8 meninggalkan pendekatan berbasis \textit{anchor box} yang membutuhkan kalibrasi tambahan pada objek dengan rasio aspek beragam, lalu menggantinya dengan \textit{decoupled anchor-free detection head} yang langsung memprediksi titik pusat objek \cite{yaseen2024yolov8indepthexplorationinternal}. Pendekatan tanpa \textit{anchor} ini membantu deteksi atribut kecil seperti helm yang ukurannya relatif terhadap badan motor selalu bervariasi. Ketiga, YOLOv8n memakai \textit{backbone} CSPDarknet dengan modul C2f untuk mengekstrak fitur visual secara efisien, lalu menghubungkannya ke \textit{neck} yang menggabungkan \textit{Feature Pyramid Network} (FPN) dan \textit{Path Aggregation Network} (PAN) sehingga objek pada beragam skala dapat dideteksi dalam satu kali \textit{forward pass} \cite{lenawala2023yolov8,terven2023yoloreview}. Ringkasan komponen arsitektur tersebut tersaji pada Tabel~\ref{tab:arsitektur-yolov8n}.
 
 \begin{table}[H]
 \centering
@@ -243,7 +245,7 @@ Tahap ini berfokus pada pelatihan dan evaluasi model deteksi objek untuk mengena
 \end{enumerate}
 
 \subsection{Tahap 3: Konstruksi Pipeline Streaming Real-Time}
-Tahap ini membangun pipeline streaming terdistribusi untuk mengubah deteksi mentah menjadi \textit{event} terverifikasi.
+Tahap ini membangun pipeline streaming untuk mengubah deteksi mentah menjadi \textit{event} terverifikasi. Layanan streaming dijalankan sebagai kontainer Docker yang terpisah pada satu mesin, sehingga karakter pemrosesan antarlayanan tetap terjaga tanpa memerlukan banyak perangkat fisik.
 \begin{enumerate}[a.]
 \item {Integrasi inferensi dan pelacakan}: inferensi YOLOv8 diintegrasikan dengan pelacakan multiobjek ByteTrack secara lokal untuk menjaga identitas kendaraan (\textit{Track ID}) secara persisten.
 \item {Penerapan filter logika bertingkat}: metrik IoA digunakan untuk memvalidasi asosiasi antara pengendara dan sepeda motor, lalu konfirmasi temporal \textit{N-frame} diterapkan untuk mengurangi \textit{false positive} akibat oklusi sesaat.
