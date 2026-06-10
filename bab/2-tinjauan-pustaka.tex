@@ -4,12 +4,12 @@
 
 \section{Penelitian Terdahulu}
 Dibandingkan dengan lima penelitian pada Tabel~\ref{tab:penelitian_terdahulu},
-studi ini berfokus pada pengembangan sistem end-to-end. Sistem yang diusulkan
-mengintegrasikan deteksi, pelacakan, dan evaluasi kinerja simpang secara
-real-time dengan model YOLOv8 dan arsitektur \textit{big data streaming}.
-Pendekatan ini melampaui studi terdahulu yang umumnya berhenti pada deteksi
-atau pelacakan. Luarannya adalah analisis lalu lintas yang lebih adaptif dan
-terukur melalui alur otomatis.
+studi ini berfokus pada pengembangan sistem \textit{end-to-end}. Sistem yang diusulkan
+mengintegrasikan deteksi, pelacakan, dan analitik pelanggaran helm secara
+\textit{real-time} dengan model YOLOv8 dan arsitektur \textit{big data streaming}.
+Pendekatan ini berbeda dari studi terdahulu yang umumnya hanya membahas deteksi
+atau pelacakan. Luaran penelitian ini adalah alur analitik yang menghubungkan hasil deteksi,
+pelacakan, dan penyimpanan data secara otomatis.
 
 \vspace{0.5\baselineskip}
 
@@ -66,12 +66,12 @@ terukur melalui alur otomatis.
 \subsection{Big Data}
 
 \textit{Big Data} merupakan kumpulan data berukuran besar, tumbuh cepat, dan
-beragam. Karakteristik ini membuat pendekatan pengolahan tradisional menjadi
+beragam. Karakteristik ini membuat pengolahan tradisional
 kurang efisien. Karakteristik utama \textit{Big Data} dikenal sebagai "5V"
 \cite{marz2015big}:
 
 \begin{enumerate}[a.]
-  \item \textit{Volume}: Data yang dihasilkan sangat besar, misalnya aliran video 24/7 dari empat kamera CCTV dan data pelanggaran yang terus bertambah pada \textit{data warehouse}. Kondisi ini membutuhkan infrastruktur penyimpanan dan pemrosesan yang skalabel.
+  \item \textit{Volume}: Data berukuran besar, misalnya aliran video 24/7 dari kamera CCTV dan data pelanggaran yang terus bertambah pada \textit{data warehouse}. Kondisi ini membutuhkan infrastruktur penyimpanan dan pemrosesan yang skalabel.
 
   \item \textit{Velocity}: Data perlu diproses secara \textit{real-time} dengan target latensi $\leq$ 2 detik, sehingga arsitektur sistem harus efisien dan stabil.
 
@@ -84,11 +84,11 @@ kurang efisien. Karakteristik utama \textit{Big Data} dikenal sebagai "5V"
 
 \item \textit{Veracity}: Keandalan dan akurasi data harus dijaga melalui proses validasi untuk menekan \textit{false positive} dan \textit{false negative}.
 
-\item \textit{Value}: Data perlu menghasilkan nilai guna, misalnya dalam bentuk dasbor analitik untuk mendukung pengambilan keputusan.
+\item \textit{Value}: Data perlu menghasilkan nilai praktis, misalnya dalam bentuk \textit{dashboard} analitik untuk mendukung pengambilan keputusan.
 \end{enumerate}
 
 Penelitian ini menghadapi tantangan utama pada aspek \textit{volume} dan
-\textit{velocity}. Kondisi tersebut mendorong penggunaan
+\textit{velocity}. Kondisi tersebut menjadi alasan penggunaan
 \textit{stream processing} dibandingkan \textit{batch processing}. Salah satu
 pendekatan yang relevan adalah \textit{Kappa Architecture}, yang memungkinkan
 pemrosesan historis dan \textit{real-time} melalui satu alur data
@@ -98,16 +98,16 @@ pemrosesan historis dan \textit{real-time} melalui satu alur data
 
 Arsitektur Kappa adalah pendekatan pemrosesan \textit{Big Data} yang berfokus
 pada aliran data \textit{real-time} \cite{kreps2014iheartlogs}. Pendekatan
-ini menyederhanakan Arsitektur Lambda dengan menghilangkan pemisahan antara
+ini menyederhanakan arsitektur Lambda dengan menghilangkan pemisahan antara
 \textit{batch layer} dan \textit{speed layer}.  Data bersifat temporal dan dapat dipandang sebagai
 aliran peristiwa (\textit{event stream}). Karena itu, paradigma
 \textit{stream-first} memproses data historis dan data baru melalui jalur yang
 sama. Pada arsitektur ini, repositori log seperti Apache~Kafka berperan
 sebagai \textit{single source of truth} dan tetap memungkinkan proses
 \textit{replay} saat diperlukan. Dengan satu alur pemrosesan, arsitektur
-Kappa menawarkan latensi rendah dan konsistensi implementasi
-\cite{kreps2014questioning}. Dampaknya, pengembangan, pengujian, dan
-pemeliharaan sistem analitik menjadi lebih efisien.
+Kappa digunakan untuk menekan latensi dan menjaga konsistensi implementasi
+\cite{kreps2014questioning}. Dengan rancangan ini, pengembangan, pengujian, dan
+pemeliharaan sistem analitik menjadi lebih sederhana.
 
 Arsitektur Kappa terdiri atas tiga komponen utama:
 \begin{enumerate}[a.]
@@ -128,30 +128,29 @@ Dengan satu \textit{pipeline}, Arsitektur Kappa cocok untuk aplikasi berlatensi 
 \subsubsection{Apache Kafka}
 Apache Kafka adalah platform \textit{streaming} terdistribusi yang dirancang
 untuk menangani aliran data berkecepatan tinggi dengan latensi rendah dan
-keandalan tinggi. Dalam arsitektur data \textit{real-time}, Kafka berperan
+keandalan yang baik. Dalam arsitektur data \textit{real-time}, Kafka berperan
 sebagai \textit{message broker} yang menghubungkan produsen dan konsumen data
 secara asinkron, termasuk pada sistem berskala besar berbasis
 \textit{microservices} \cite{kreps2014questioning}. Penerapan Kafka pada
 pemrosesan video \textit{real-time} juga telah dilaporkan dalam penelitian
-\cite{ayae2017video}, yang menunjukkan bahwa Kafka mampu menjaga kontinuitas
-aliran data secara stabil.
+\cite{ayae2017video}, yang menunjukkan bahwa Kafka mampu menjaga aliran data tetap berjalan.
 
-Kafka menyimpan data secara arsitektural sebagai rekaman berurutan di dalam
+Kafka menyimpan data sebagai rekaman berurutan di dalam
 \textit{topic} yang dibagi ke beberapa \textit{partition}. Mekanisme ini
 memungkinkan proses tulis-baca berlangsung paralel, sehingga \textit{throughput}
 sistem meningkat tanpa mengorbankan latensi. Setiap data memiliki
 \textit{offset} sebagai penanda posisi, sehingga status konsumsi data dapat
-dilacak dengan presisi dan diputar ulang (\textit{replay}) saat dibutuhkan.
+dilacak secara tepat dan diputar ulang (\textit{replay}) saat dibutuhkan.
 
 Kafka juga menyediakan reliabilitas melalui replikasi
 \textit{partition} antar-\textit{broker} untuk menjaga ketahanan layanan saat
 terjadi kegagalan simpul. Karakteristik \textit{durable log} dan pola
-\textit{publish-subscribe} ini menjadikan Kafka sesuai sebagai
+\textit{publish-subscribe} ini membuat Kafka sesuai sebagai
 \textit{ingestion layer} pada Arsitektur Kappa, karena banyak konsumen dapat
 mengolah aliran data yang sama secara independen \cite{kreps2014questioning}.
 Dalam penelitian ini, Kafka berfungsi sebagai jalur distribusi hasil deteksi
 dari modul visi komputer menuju pemrosesan \textit{streaming} secara kontinu,
-sehingga analitik \textit{end-to-end} tetap responsif dan konsisten
+sehingga analitik \textit{end-to-end} tetap berjalan konsisten
 \cite{ayae2017video}.
 
 \begin{figure}[H]
@@ -211,7 +210,7 @@ memperbarui \textit{state} secara berkelanjutan.
 \textit{Convolutional Neural Network} (CNN) yang memprediksi
 \textit{bounding box} dan kelas objek secara langsung dalam satu tahap
 (\textit{single-stage detector}) \cite{redmon2016you}. Berbeda dengan metode
-dua tahap seperti R-CNN, YOLO memformulasikan deteksi sebagai masalah regresi
+dua tahap seperti R-CNN, YOLO merumuskan deteksi sebagai masalah regresi
 tunggal dari piksel citra ke koordinat kotak dan probabilitas kelas
 \cite{redmon2016you}.
 
@@ -231,11 +230,11 @@ Bentuk keluaran model dinyatakan pada Persamaan~\ref{eq:tensor_output}:
 \label{fig:yolo}
 \end{figure}
 
-Representasi ini menunjukkan bahwa \(x, y\) menyatakan koordinat pusat kotak
+Pada representasi ini, \(x, y\) menyatakan koordinat pusat kotak
 yang diprediksi relatif terhadap sel grid tempat objek terdeteksi. Sementara
 itu, \(w, h\) menyatakan lebar dan tinggi kotak pembatas relatif terhadap
-ukuran citra masukan. Formulasi ini membantu model menjaga konsistensi
-lokalisasi ketika skala objek berubah. Formulasi ini juga mempermudah
+ukuran citra masukan. Formulasi ini membantu menjaga konsistensi
+lokalisasi ketika skala objek berubah dan mempermudah
 konversi ke koordinat absolut pada tahap pascapemrosesan.
 
 Skor \textit{confidence} didefinisikan sebagai kombinasi antara probabilitas
@@ -252,7 +251,7 @@ C = \Pr(\text{Object}) \times \text{IoU}(\text{pred}, \text{truth})
 \end{equation}
 
 Fungsi kerugian YOLO menggunakan \textit{sum-squared error} untuk
-menyeimbangkan kesalahan prediksi koordinat, ukuran kotak,
+menghitung kesalahan prediksi koordinat, ukuran kotak,
 \textit{confidence}, dan klasifikasi \cite{redmon2016you}. Parameter
 $\lambda_{\text{coord}}$ dan $\lambda_{\text{noobj}}$ digunakan untuk
 mengatur bobot kesalahan koordinat dan penalti pada kotak tanpa objek. Bentuk
@@ -331,22 +330,19 @@ objek.
 Pada sistem video \textit{real-time}, identitas objek perlu dipertahankan
 secara konsisten antar-frame agar pelacakan berkelanjutan. Deteksi objek saja
 umumnya hanya menghasilkan posisi objek pada satu frame tanpa menjaga
-identitas lintas waktu. Kebutuhan ini mendorong penggunaan pendekatan
+identitas lintas waktu. Kebutuhan ini menjadi alasan penggunaan pendekatan
 \textit{Multi-Object Tracking} (MOT), salah satunya \textit{ByteTrack}
 \cite{zhang2022bytetrack_eccv}, yang menerapkan asosiasi dua tahap untuk
-menjaga kontinuitas identitas objek saat bergerak.
-
-ByteTrack mengatasi keterbatasan asosiasi konvensional dengan tetap
-mempertimbangkan deteksi berskor rendah yang kerap muncul akibat
+menjaga kontinuitas identitas objek saat bergerak. ByteTrack mempertimbangkan deteksi berskor rendah yang kerap muncul akibat
 \textit{occlusion}, perubahan pencahayaan, atau ukuran objek kecil. Asosiasi
 dilakukan secara bertahap, pertama pada deteksi skor tinggi, lalu pada deteksi
 skor rendah untuk memulihkan identitas yang sempat hilang. Strategi ini
-meningkatkan stabilitas pelacakan dan menurunkan risiko kehilangan identitas
+membantu menjaga pelacakan dan mengurangi risiko kehilangan identitas
 pada lingkungan dinamis \cite{zhang2022bytetrack_eccv}.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{gambar/bytraking_pipeline.png}
+\includegraphics[width=0.6\textwidth]{gambar/bytraking_pipeline.png}
 \caption{Pipeline ByteTrack \cite{zhang2022bytetrack_eccv}. Arsitektur ini mengintegrasikan tahap deteksi dan asosiasi secara bertingkat untuk mempertahankan identitas objek pada video \textit{real-time}.}
 \label{fig:bytetrack_pipeline}
 \end{figure}
@@ -361,11 +357,11 @@ dengan \textit{Kalman Filter}, sedangkan pencocokan antara deteksi dan prediksi
 dilakukan menggunakan metrik \textit{Intersection over Union} (IoU).
 
 Pada tahap pertama, lintasan aktif dicocokkan dengan deteksi skor tinggi untuk
-mendapatkan pasangan paling andal. Tahap kedua meninjau lintasan yang belum
+mendapatkan pasangan yang paling sesuai. Tahap kedua meninjau lintasan yang belum
 terasosiasi dan mencocokkannya dengan deteksi skor rendah agar identitas dapat
 dipulihkan. Penugasan akhir diselesaikan menggunakan
 \textit{Hungarian Algorithm} untuk meminimalkan biaya asosiasi berbasis IoU.
-Pendekatan ini efektif meningkatkan stabilitas pelacakan pada kondisi
+Pendekatan ini membantu meningkatkan stabilitas pelacakan pada kondisi
 \textit{occlusion} dan variasi pencahayaan tinggi.
 
 \begin{figure}[H]
@@ -383,11 +379,11 @@ dengan basis data operasional yang berfokus pada transaksi harian,
 \textit{data warehouse} dioptimalkan untuk \textit{query} kompleks, agregasi,
 dan analisis historis \cite{vyas2025demystifying}. Struktur ini memungkinkan
 integrasi data dari berbagai sumber sehingga informasi strategis dapat
-dihasilkan secara lebih komprehensif. Data di dalam \textit{data warehouse}
+dihasilkan secara lebih lengkap. Data di dalam \textit{data warehouse}
 bersifat terintegrasi, berorientasi subjek, historis, dan relatif stabil.
 Informasi disusun untuk mendukung analisis multidimensi, pembacaan tren
-jangka panjang, serta perbandingan antarkurun waktu. Dalam praktik terkini,
-konsep ini juga diadopsi pada
+jangka panjang, serta perbandingan antarkurun waktu. Dalam praktik saat ini,
+konsep ini juga digunakan pada
 lingkungan \textit{cloud} dan \textit{big data} untuk meningkatkan
 skalabilitas serta efisiensi analitik \cite{golfarelli2024bigdata}.
 \subsection{Data Mart}
@@ -399,22 +395,22 @@ Dalam konteks sistem pemantauan pelanggaran helm, rancangan ini memungkinkan
 penetapan \textit{event grain} yang jelas pada tabel fakta. Dengan demikian,
 setiap kejadian dapat terekam konsisten dan tetap dapat diaudit. Penggunaan
 tabel dimensi yang dapat digunakan ulang, seperti dimensi kamera, jenis
-pelanggaran, dan waktu, juga membentuk struktur deskriptif yang stabil untuk
-analisis lintas sudut pandang.
+pelanggaran, dan waktu, juga menyediakan struktur deskriptif untuk
+analisis dari beberapa sudut pandang.
 
-Dari perspektif performa, \textit{data mart} menyediakan jalur agregasi yang
+Dari sisi performa, \textit{data mart} menyediakan jalur agregasi yang
 lebih efisien untuk kebutuhan panel Grafana karena metrik telah dipetakan pada
 skema relasional yang terarah. Struktur ini juga berfungsi sebagai lapisan
-semantik yang stabil untuk definisi indikator kinerja utama (KPI), sehingga
-istilah, rumus, dan konteks analitik tetap konsisten pada seluruh dasbor.
+definisi yang konsisten untuk definisi indikator kinerja utama (KPI), sehingga
+istilah, rumus, dan konteks analitik tetap konsisten pada seluruh dashboard.
 Tanpa lapisan \textit{data mart}, kueri analitik harus berulang kali
 merekonstruksi logika bisnis langsung dari aliran data mentah. Kondisi ini
-berisiko meningkatkan latensi, inkonsistensi hasil, dan kompleksitas
+dapat meningkatkan latensi, menghasilkan inkonsistensi, dan menambah kompleksitas
 pemeliharaan sistem.
 
 \subsubsection{Star Schema}
 
-\textit{Star schema} merupakan paradigma pemodelan data multidimensi yang
+\textit{Star schema} merupakan pendekatan pemodelan data multidimensi yang
 banyak diterapkan pada sistem \textit{data warehouse}. Struktur ini terdiri
 atas satu tabel fakta yang menyimpan metrik numerik serta tabel dimensi yang
 menyediakan konteks deskriptif. Desain ini mendukung efisiensi analitik
@@ -423,7 +419,7 @@ pelaporan dapat dijalankan lebih cepat. Kombinasi tabel fakta dan dimensi juga
 memberi fleksibilitas untuk analisis multi-sumbu serta pelaporan berbasis
 waktu.
 
-Pendekatan \textit{star schema} memiliki beberapa keunggulan metodologis:
+Pendekatan \textit{star schema} memiliki beberapa keunggulan:
 \begin{enumerate}[a.]
 \item Memungkinkan eksekusi \textit{query} analitik berkecepatan tinggi melalui struktur denormalisasi,
 \item Menyediakan skema data yang mudah diinterpretasikan untuk pelaporan dan visualisasi,
@@ -434,19 +430,19 @@ Pendekatan \textit{star schema} memiliki beberapa keunggulan metodologis:
 
 \textit{Grafana} adalah platform sumber terbuka untuk visualisasi data dan
 pengembangan \textit{dashboard} interaktif pada lingkungan
-\textit{big data warehouse}. Platform ini terintegrasi dengan berbagai sistem,
+\textit{big data warehouse}. Platform ini dapat terhubung dengan berbagai sistem,
 seperti \textit{Apache Kafka}, \textit{Prometheus}, \textit{InfluxDB}, dan
 \textit{Elasticsearch}, sehingga sesuai untuk pemantauan \textit{real-time}
 \cite{sutanto2025wazuhgrafana}. Melalui antarmuka web, Grafana membantu pengguna
 memantau performa sistem, mendeteksi anomali, dan melakukan analisis
-operasional secara dinamis.
+operasional .
 
 Grafana berperan sebagai lapisan presentasi yang menghubungkan hasil
 pemrosesan sistem analitik, seperti \textit{Apache Spark}, ke dalam
 visualisasi interaktif yang diperbarui otomatis. Aliran data dari
 \textit{streaming pipeline} diproses melalui mekanisme
-\textit{Extract--Transform--Load} (ETL) sebelum ditampilkan pada dasbor.
-Pendekatan ini mendukung paradigma \textit{real-time analytics}, sehingga
+\textit{Extract--Transform--Load} (ETL) sebelum ditampilkan pada dashboard.
+Rancangan ini mendukung \textit{real-time analytics}, sehingga
 pengguna dapat mengeksplorasi data terbaru tanpa menunggu siklus
 \textit{batch} \cite{devireddy2020realtimewarehouse}.
 
@@ -458,7 +454,7 @@ mengikuti protokol \textit{MS COCO} \cite{lin2014microsoft} dengan metrik
 utama \textit{Precision}, \textit{Recall}, \textit{Average Precision} (AP),
 dan \textit{Mean Average Precision} (mAP). Melalui metrik tersebut,
 keseimbangan antara deteksi benar dan kesalahan prediksi dapat dinilai secara
-komprehensif.
+menyeluruh.
 
 \subsubsection{Klasifikasi Deteksi: TP, FP, FN, dan TN}
 
@@ -475,7 +471,7 @@ FN_i &= \sum_{j \neq i} TC_{ij}, & TN_i &= \sum_{p \neq i} \sum_{q \neq i} TC_{p
 \end{aligned}
 \end{equation}
 
-Makna metrik dapat dibaca secara sederhana. \textit{True Positive} (TP) adalah
+Makna setiap metrik adalah sebagai berikut. \textit{True Positive} (TP) adalah
 jumlah prediksi benar pada kelas yang sedang dianalisis. \textit{False
 Positive} (FP) adalah sampel dari kelas lain yang salah diprediksi sebagai
 kelas target. \textit{False Negative} (FN) adalah sampel kelas target yang
@@ -506,9 +502,9 @@ keseluruhan.
 \label{fig:tp_fp_fn_tn}
 \end{figure}
 
-Klasifikasi tersebut menjadi dasar kuantitatif untuk menilai keseimbangan
+Klasifikasi ini menjadi dasar kuantitatif untuk menilai keseimbangan
 antara kemampuan model mendeteksi objek relevan dan risiko kesalahan deteksi.
-Keterkaitan antarkomponen ini penting untuk menafsirkan metrik lanjutan,
+Relasi antarkomponen ini digunakan untuk menafsirkan metrik lanjutan,
 seperti kurva \textit{Precision-Recall} dan mAP. Relasi antara
 \textit{Precision}, \textit{Recall}, dan \textit{Intersection over Union}
 (IoU) ditunjukkan pada Gambar~\ref{fig:precision_recall_iou}.
@@ -540,7 +536,7 @@ kemudian digunakan untuk menghitung metrik agregat, terutama AP dan mAP.
 
 \subsubsection{Average Precision (AP) dan Mean Average Precision (mAP)}
 
-Evaluasi performa deteksi objek umumnya menggunakan metrik
+Evaluasi kinerja deteksi objek umumnya menggunakan metrik
 \textit{Average Precision} (AP) dan \textit{Mean Average Precision} (mAP),
 yang menjadi standar utama pada dataset \textit{MS COCO}
 \cite{lin2014microsoft}. Kedua metrik ini menilai keseimbangan antara
@@ -554,7 +550,7 @@ secara matematis dinyatakan sebagai:
 \begin{equation}
 \text{AP} = \int_{0}^{1} \text{Precision}(\text{Recall}) \, d(\text{Recall})
 \end{equation}
-Nilai AP yang tinggi menunjukkan bahwa model mampu mempertahankan presisi
+Nilai AP yang tinggi berarti model mampu mempertahankan presisi
 tinggi pada rentang \textit{recall} yang luas. Untuk menilai performa model
 secara keseluruhan lintas kelas dan ambang lokalisasi, digunakan mAP yang
 merupakan rata-rata AP pada beberapa ambang IoU. Formulasi mAP pada
@@ -591,21 +587,19 @@ objek, tetapi juga ketepatan batas spasialnya.
 
 Evaluasi sistem pemrosesan data \textit{real-time} berbasis arsitektur Kappa
 tidak hanya menilai akurasi keluaran, tetapi juga efisiensi aliran data yang
-berjalan kontinu dengan jeda serendah mungkin
+berjalan kontinu dengan jeda rendah
 \cite{kreps2014questioning}. Dua metrik utama yang digunakan adalah
-\textit{throughput} dan \textit{latency}, yang bersama-sama merepresentasikan
+\textit{throughput} dan \textit{latency}, yang bersama-sama menggambarkan
 kinerja \textit{pipeline} pemrosesan \textit{end-to-end}
 \cite{kleppmann2017designing}. \textit{Throughput} menunjukkan jumlah unit
 data, seperti \textit{frame} video atau pesan Kafka, yang dapat diproses
 sistem per satuan waktu. Metrik ini umumnya diukur dalam
 \textit{frame per second} (FPS) \cite{marz2015big}.
 
-Sebaliknya, \textit{latency} menggambarkan jeda antara data diterima dan hasil
+\textit{latency} menggambarkan jeda antara data diterima dan hasil
 dikeluarkan \cite{kleppmann2017designing}. Pada arsitektur Kappa, seluruh
 pemrosesan berlangsung dalam satu jalur \textit{stream pipeline}. Karena itu,
 nilai \textit{latency} dipengaruhi oleh rancangan pemrosesan
-\textit{stateful} dan efisiensi komunikasi antarkomponen. Sistem streaming
-dinilai optimal jika mampu mempertahankan \textit{throughput} tinggi dengan
-\textit{latency} rendah, idealnya pada rentang \textit{sub-second}. Kondisi
-ini penting untuk aplikasi visi komputer yang membutuhkan respons cepat,
-seperti deteksi pelanggaran lalu lintas \cite{kreps2014questioning}.
+\textit{stateful} dan efisiensi komunikasi antarkomponen. Sistem \textit{streaming}
+dinilai baik jika mampu mempertahankan \textit{throughput} tinggi dengan
+\textit{latency} rendah, idealnya pada rentang \textit{sub-second}.

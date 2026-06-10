@@ -7,7 +7,7 @@ Pengembangan dan pengujian sistem dilakukan pada satu unit laptop dengan spesifi
 
 \begin{table}[h]
   \centering
-  \caption{Spesifikasi Perangkat Keras}
+  \caption{Spesifikasi perangkat keras}
   \label{tab:spek-hardware}
   \footnotesize
   \setlength{\tabcolsep}{4pt}
@@ -24,22 +24,42 @@ Pengembangan dan pengujian sistem dilakukan pada satu unit laptop dengan spesifi
 \end{table}
 
 \section{Deskripsi Data}
-Subbab ini memerinci data penelitian yang meliputi jenis dan sumber data, proses anotasi, dan strategi augmentasi. Uraian setiap aspek disajikan pada subsubbab berikutnya sebagai dasar pembentukan dataset dan evaluasi model.
+Subbab ini menjelaskan data penelitian yang meliputi jenis dan sumber data, proses anotasi, dan strategi augmentasi. Uraian setiap aspek disajikan pada subsubbab berikutnya sebagai dasar penyusunan dataset dan evaluasi model.
 \subsection{Jenis dan Sumber Data}
-Data yang digunakan dalam penelitian ini dikategorikan menjadi dua jenis utama berdasarkan asal dan perannya dalam sistem, yaitu data primer dan data sekunder.
+Data yang digunakan dalam penelitian ini dibagi menjadi dua jenis berdasarkan asal dan perannya dalam sistem, yaitu data primer dan data sekunder.
 
 \begin{enumerate}[a.]
   \item Data Primer:
-    Data primer berupa rekaman video CCTV yang diperoleh dari Unit K3L Institut Teknologi Sumatera (Itera) berdasarkan izin resmi tertulis. Data yang digunakan merupakan rekaman luring (\textit{non-real-time}) dari satu kamera CCTV yang terpasang di gerbang utama kampus. Rekaman mencakup periode pengamatan satu hari, yaitu 5 Februari 2026, dengan rentang waktu perekaman pukul 07.00 hingga 17.00 WIB.
+  Data primer berupa rekaman video CCTV yang diperoleh dari Unit K3L Institut Teknologi Sumatera (ITERA) berdasarkan izin tertulis. Rekaman berasal dari satu kamera CCTV yang terpasang di gerbang utama kampus pada posisi statis (\textit{static CCTV}) yang mengarah ke arus lalu lintas kendaraan bermotor yang masuk dan keluar area kampus. Periode pengamatan penuh mencakup satu hari, yaitu 5 Februari 2026, dengan rentang waktu perekaman pukul 07.00 hingga 17.00 WIB (10 jam). Spesifikasi teknis cuplikan rekaman tersebut disajikan pada Tabel~\ref{tab:metadata-video}.
+ 
+  \begin{table}[htpb]
+    \centering
+    \caption{Spesifikasi teknis rekaman video CCTV}
+    \label{tab:metadata-video}
+    \begin{tabular}{p{0.45\textwidth} p{0.4\textwidth}}
+      \toprule
+      \textbf{Parameter} & \textbf{Nilai} \\
+      \midrule
+      Resolusi (\textit{frame}) & 1.280 $\times$ 720 piksel\\
+      \textit{Aspect ratio} & 16:9 (1,7778) \\
+      \textit{Frame rate} (FPS) & 25 frame/detik \\
+      Estimasi \textit{bitrate} & $\approx$1,85 Mbps \\
+      Ruang warna & RGB \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+ 
+  
+ 
+  Resolusi 1.280 $\times$ 720 piksel (720p) dipilih sebagai keseimbangan antara kebutuhan detail visual untuk deteksi objek kecil, yaitu helm pengendara, dan batasan kapasitas pemrosesan pada perangkat keras yang digunakan. Pada resolusi ini, objek helm berukuran relatif kecil (rata-rata $\approx$30--60 piksel tinggi) masih dapat dideteksi oleh model YOLOv8 dengan skor kepercayaan yang cukup, sementara beban komputasi inferensi tetap dapat dijalankan pada GPU terintegrasi (\textit{integrated graphics}) tanpa penurunan \textit{throughput} yang besar.
 
-    Rekaman ini merepresentasikan arus lalu lintas utama kendaraan bermotor yang masuk dan keluar area kampus, sehingga relevan untuk analisis pelanggaran penggunaan helm di lingkungan kampus.
 
   \item Data Sekunder:
-    Untuk mendukung pelatihan dan evaluasi model deteksi objek berbasis YOLOv8, penelitian ini menggunakan data sekunder berupa \textit{ITERA Helmet Dataset}. Dataset ini dibangun dari data primer melalui ekstraksi \textit{frame} secara selektif. Pengambilan \textit{frame} dilakukan berdasarkan kondisi visual yang memadai untuk deteksi objek, sehingga diperoleh 390 \textit{frame} yang representatif. Dataset kemudian dianotasi secara manual dengan tiga kelas target: \texttt{DRIVER\_HELMET}, \texttt{DRIVER\_NO\_HELMET}, dan \texttt{MOTORCYCLE}.
+    Untuk pelatihan dan evaluasi model deteksi objek berbasis YOLOv8, penelitian ini menggunakan data sekunder berupa \textit{ITERA Helmet Dataset}. Dataset ini dibangun dari data primer melalui ekstraksi \textit{frame} secara selektif. Pengambilan \textit{frame} dilakukan berdasarkan kondisi visual yang cukup jelas untuk deteksi objek, sehingga diperoleh 390 \textit{frame} yang representatif. Dataset kemudian dianotasi secara manual dengan tiga kelas target: \texttt{DRIVER\_HELMET}, \texttt{DRIVER\_NO\_HELMET}, dan \texttt{MOTORCYCLE}.
 \end{enumerate}
 
 \subsection{Anotasi Data}
-Anotasi dilakukan secara manual untuk membentuk data \textit{ground truth} pada setiap \textit{frame} hasil ekstraksi. Objek pengendara dan sepeda motor diberikan \textit{bounding box}. Pengendara dilabeli \texttt{DRIVER\_HELMET} atau \texttt{DRIVER\_NO\_HELMET}, sedangkan sepeda motor dilabeli \texttt{MOTORCYCLE} sebagai konteks pelacakan. Skema anotasi diterapkan secara konsisten pada seluruh data (Gambar~\ref{fig:contoh_anotasi}), kemudian diverifikasi dan diekspor ke format YOLO.
+Anotasi dilakukan secara manual untuk menyusun data \textit{ground truth} pada setiap \textit{frame} hasil ekstraksi. Objek pengendara dan sepeda motor diberikan \textit{bounding box}. Pengendara dilabeli \texttt{DRIVER\_HELMET} atau \texttt{DRIVER\_NO\_HELMET}, sedangkan sepeda motor dilabeli \texttt{MOTORCYCLE} sebagai konteks pelacakan. Aturan anotasi diterapkan secara konsisten pada seluruh data (Gambar~\ref{fig:contoh_anotasi}), kemudian diverifikasi dan diekspor ke format YOLO.
 
 \begin{figure}[htpb]
   \centering
@@ -49,11 +69,11 @@ Anotasi dilakukan secara manual untuk membentuk data \textit{ground truth} pada 
 \end{figure}
 
 \subsection{Augmentasi Data}
-Augmentasi diterapkan hanya pada data latih untuk mengurangi \textit{overfitting} dan meningkatkan generalisasi model. Transformasi meliputi rotasi, \textit{shear}, perubahan eksposur, \textit{blur}, \textit{noise}, dan \textit{motion blur}. Rentang parameter dipilih secara moderat agar variasi visual meningkat tanpa mengubah makna objek. Data validasi dan data uji tidak diaugmentasi untuk menjaga objektivitas evaluasi. Rincian parameter disajikan pada Tabel~\ref{tab:augmentasi}.
+Augmentasi diterapkan hanya pada data latih untuk mengurangi \textit{overfitting} dan membantu model mengenali variasi data baru. Transformasi meliputi rotasi, \textit{shear}, perubahan eksposur, \textit{blur}, \textit{noise}, dan \textit{motion blur}. Rentang parameter dibuat tidak terlalu besar agar variasi visual meningkat tanpa mengubah kelas objek. Data validasi dan data uji tidak diaugmentasi untuk menjaga objektivitas evaluasi. Rincian parameter disajikan pada Tabel~\ref{tab:augmentasi}.
 
 \begin{table}[htpb]
   \centering
-  \caption{Parameter Augmentasi Data}
+  \caption{Parameter augmentasi data}
   \label{tab:augmentasi}
   \begin{tabular}{ll}
     \toprule
@@ -70,20 +90,42 @@ Augmentasi diterapkan hanya pada data latih untuk mengurangi \textit{overfitting
 \end{table}
 
 \section{Arsitektur Sistem}
-Sistem dibangun dengan \textit{Kappa Architecture} \cite{kreps2014questioning} yang menempatkan pemrosesan aliran data sebagai jalur utama. Gambar~\ref{fig:architecture} memperlihatkan enam lapisan utama arsitektur tersebut. Lapisan \textit{Data Source} menyuplai video CCTV beserta identitas kamera, resolusi, dan posisi geospasial. Lapisan \textit{Ingestion \& Edge Intelligence} menangani akuisisi, pra-pemrosesan \textit{frame}, dan penambahan stempel waktu serta metadata teknis. Lapisan \textit{Buffering} memakai Apache Kafka sebagai \textit{message broker} agar aliran data tetap andal, skalabel, dan berurutan per kamera. Lapisan \textit{Stream Processing} memproses \textit{event} secara \textit{real-time} pada Apache Spark Structured Streaming melalui validasi skema, deduplikasi, dan agregasi singkat. Lapisan \textit{Persistence} menyimpan hasil pada \textit{data mart} berskema bintang dengan mekanisme \textit{upsert}. Lapisan \textit{Presentation} menyajikan hasil analitik melalui Grafana Dashboard untuk menopang pemantauan dan pengambilan keputusan operasional.
+
+Arsitektur sistem dirancang untuk menghubungkan akuisisi video, pengolahan data, penyimpanan hasil deteksi, dan penyajian analitik. Setiap komponen memiliki peran berbeda, tetapi saling terhubung dalam satu alur pemrosesan.
+
+
+Arsitektur berlapis digunakan karena sistem pelacakan pelanggaran helm tidak hanya membutuhkan modul deteksi objek, tetapi juga pengelolaan aliran data yang stabil dari sumber video hingga penyajian hasil. Aliran video CCTV memiliki karakteristik kontinu, berukuran besar, dan sensitif terhadap keterlambatan pemrosesan.
+
+
+\begin{enumerate}[a.]
+  \item \textit{Data Source}: menyuplai aliran video CCTV beserta identitas kamera, resolusi, dan posisi geospasial yang menjadi konteks setiap \textit{frame}.
+
+  \item \textit{Ingestion \& Edge Intelligence}: menangani akuisisi \textit{frame}, pra-pemrosesan ringan, serta penambahan stempel waktu dan metadata teknis sebelum aliran diteruskan ke \textit{message broker}.
+
+  \item \textit{Buffering}: memakai Apache Kafka sebagai \textit{message broker} sehingga aliran peristiwa tetap andal, skalabel, dan berurutan per kamera ketika proses hilir mengalami keterlambatan.
+
+  \item \textit{Stream Processing}: mengolah \textit{event} pada Apache Spark Structured Streaming melalui validasi skema, deduplikasi, dan agregasi singkat sehingga keluarannya siap disimpan.
+
+  \item \textit{Persistence}: menyimpan hasil olahan pada \textit{data mart} PostgreSQL berskema bintang dengan mekanisme \textit{upsert} untuk menjaga konsistensi catatan pelanggaran lintas waktu.
+
+  \item \textit{Presentation}: menyajikan hasil analitik melalui \textit{dashboard} Grafana sebagai antarmuka pemantauan dan dasar pengambilan keputusan operasional.
+\end{enumerate}
+
+Secara keseluruhan, keenam komponen tersebut membentuk alur kerja dari video mentah menjadi informasi analitik yang siap digunakan. Kafka berperan sebagai penyangga agar aliran data tetap stabil, sedangkan Spark Structured Streaming memastikan data yang masuk ke penyimpanan sudah melalui proses validasi dan pengolahan awal. Hasil olahan disimpan dalam \textit{data mart} agar dapat ditampilkan secara ringkas melalui Grafana dan dimanfaatkan untuk pemantauan pelanggaran helm secara operasional.
+
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=1\textwidth]{gambar/kappa_arsitektur_helm.png}
-  \caption{Arsitektur Sistem Streaming-First Pelacakan Pelanggaran Helm}
+  \caption{Arsitektur sistem \textit{streaming-first} pelacakan pelanggaran helm}
   \label{fig:architecture}
 \end{figure}
 \section{Perancangan Model YOLOv8}
-Bagian ini menjelaskan perancangan model deteksi, yaitu proses pelatihan YOLOv8 sebagai komponen pengenalan objek pada lapisan \textit{Ingestion \& Edge Intelligence}. Integrasi ByteTrack pada tahap inferensi dibahas terpisah pada Sub-bab~\ref{sec:logika-deteksi} bersama logika filter spasial-temporal lainnya.
+Bagian ini menjelaskan perancangan model deteksi, yaitu proses pelatihan YOLOv8 sebagai komponen deteksi objek pada lapisan \textit{Ingestion \& Edge Intelligence}. Integrasi ByteTrack pada tahap inferensi dibahas terpisah pada Sub-bab~\ref{sec:logika-deteksi} bersama logika filter spasial-temporal lainnya.
 
 \subsection{Pelatihan Model YOLOv8n}
 \label{subsec:pelatihan-yolov8n}
-Penelitian ini memilih arsitektur YOLOv8n sebagai model deteksi objek dengan tiga pertimbangan teknis. Pertama, YOLOv8n adalah varian paling ringan pada keluarga YOLOv8 yang dirilis Ultralytics pada Januari 2023 dengan sekitar 3,2 juta parameter dan beban komputasi 8,7 GFLOPs pada resolusi $640 \times 640$ piksel \cite{jocher2023yolo,terven2023yoloreview}. Profil sekecil ini cocok untuk inferensi sisi tepi pada perangkat tanpa akselerator GPU, termasuk laptop pengujian di gerbang Itera. Kedua, YOLOv8 meninggalkan pendekatan berbasis \textit{anchor box} yang menyulitkan kalibrasi pada objek dengan rasio aspek beragam, lalu menggantinya dengan \textit{decoupled anchor-free detection head} yang langsung memprediksi titik pusat objek \cite{yaseen2024yolov8indepthexplorationinternal}. Pendekatan tanpa \textit{anchor} ini memudahkan deteksi atribut kecil seperti helm yang ukurannya relatif terhadap badan motor selalu bervariasi. Ketiga, YOLOv8n memakai \textit{backbone} CSPDarknet dengan modul C2f untuk mengekstrak fitur visual secara efisien, lalu menyambungnya ke \textit{neck} yang menggabungkan \textit{Feature Pyramid Network} (FPN) dan \textit{Path Aggregation Network} (PAN) sehingga objek pada beragam skala dapat dideteksi dalam satu kali \textit{forward pass} \cite{lenawala2023yolov8,terven2023yoloreview}. Ringkasan komponen arsitektur tersebut tersaji pada Tabel~\ref{tab:arsitektur-yolov8n}.
+Penelitian ini memilih arsitektur YOLOv8n sebagai model deteksi objek berdasarkan tiga pertimbangan teknis. Pertama, YOLOv8n adalah varian paling ringan pada keluarga YOLOv8 yang dirilis Ultralytics pada Januari 2023 dengan sekitar 3,2 juta parameter dan beban komputasi 8,7 GFLOPs pada resolusi $640 \times 640$ piksel \cite{jocher2023yolo,terven2023yoloreview}. Ukuran model ini cocok untuk inferensi sisi tepi pada perangkat tanpa akselerator GPU, termasuk laptop pengujian di gerbang Itera. Kedua, YOLOv8 meninggalkan pendekatan berbasis \textit{anchor box} yang membutuhkan kalibrasi tambahan pada objek dengan rasio aspek beragam, lalu menggantinya dengan \textit{decoupled anchor-free detection head} yang langsung memprediksi titik pusat objek \cite{yaseen2024yolov8indepthexplorationinternal}. Pendekatan tanpa \textit{anchor} ini membantu deteksi atribut kecil seperti helm yang ukurannya relatif terhadap badan motor selalu bervariasi. Ketiga, YOLOv8n memakai \textit{backbone} CSPDarknet dengan modul C2f untuk mengekstrak fitur visual secara efisien, lalu menghubungkannya ke \textit{neck} yang menggabungkan \textit{Feature Pyramid Network} (FPN) dan \textit{Path Aggregation Network} (PAN) sehingga objek pada beragam skala dapat dideteksi dalam satu kali \textit{forward pass} \cite{lenawala2023yolov8,terven2023yoloreview}. Ringkasan komponen arsitektur tersebut tersaji pada Tabel~\ref{tab:arsitektur-yolov8n}.
 
 \begin{table}[H]
 \centering
@@ -96,98 +138,101 @@ Penelitian ini memilih arsitektur YOLOv8n sebagai model deteksi objek dengan tig
 Resolusi masukan       & $640 \times 640 \times 3$ piksel RGB \\
 \textit{Backbone}      & CSPDarknet dengan modul C2f dan SPPF \\
 \textit{Neck}          & FPN + PAN (\textit{Path Aggregation Network}) \\
-\textit{Detection head} & \textit{Decoupled anchor-free}, tiga skala (P3, P4, P5) \\
+\textit{Detection head} & \textit{Decoupled anchor-free} \\
 Jumlah parameter       & 3,2 juta \\
-Kompleksitas komputasi & 8,7 GFLOPs \\
 Komponen galat         & \textit{box loss} + \textit{class loss} + \textit{distribution focal loss} \\
 \textit{Stride backbone} & 8, 16, 32 (deteksi multi-skala) \\
 \hline
 \end{tabular}
 \end{table}
 
-Pelatihan model dilakukan pada layanan terkelola Roboflow Train 3.0 dengan varian \textit{Roboflow 3.0 Object Detection (Fast)}, bukan pada lingkungan Ultralytics murni. Pertimbangannya pragmatis: platform menyediakan dasbor pemantauan, penyimpanan dataset terversi, dan jalur distribusi model siap-API yang menyingkat siklus pengembangan tesis \cite{roboflowdocs2025,roboflowblog2023}. Roboflow 3.0 merupakan arsitektur internal Roboflow yang menurunkan tiga komponen galat khas YOLOv8 yaitu \textit{box loss}, \textit{class loss}, dan \textit{distribution focal loss} (DFL); kemunculan ketiga galat ini pada Gambar~\ref{fig:train-loss} dan Gambar~\ref{fig:val-loss} di Bab 4 menjadi bukti turunan tersebut. Roboflow tidak membuka detail modifikasi internal pada \textit{backbone}, \textit{neck}, atau \textit{head} sehingga arsitektur Roboflow 3.0 (Fast) tidak dapat dijelaskan lebih dalam di luar fakta bahwa ia berasal dari keluarga YOLOv8n. Konsekuensinya, \textit{learning rate}, \textit{optimizer}, momentum, \textit{weight decay}, dan bobot komponen galat tidak terbuka untuk diatur pengguna karena platform menentukannya secara internal demi menjaga reprodusibilitas pada infrastruktur terkelola. Praktik melaporkan Roboflow 3.0 sebagai model yang setara dengan keluarga YOLO sudah lazim pada literatur perbandingan kontemporer \cite{solano2025roboflow}.
 
-Meskipun hyperparameter tingkat-bawah tidak dapat diintervensi, sejumlah konfigurasi tingkat-atas tetap dapat ditetapkan oleh pengguna dan menjadi bagian dari catatan pelatihan tesis ini. Rincian konfigurasi tersaji pada Tabel~\ref{tab:hyperparameter-pelatihan}. Resolusi masukan ditetapkan pada $640 \times 640$ piksel mengikuti \textit{default} keluarga YOLOv8 yang sengaja dipilih agar kelipatan \textit{stride} 32 terpenuhi tanpa \textit{padding} yang menggeser posisi \textit{bounding box}. Pelatihan berlangsung selama 300 \textit{epoch} dengan inisialisasi bobot dari \textit{checkpoint} COCO bawaan Roboflow yang diturunkan dari pra-pelatihan YOLOv8n pada Microsoft COCO 2017. Strategi \textit{transfer learning} ini mempercepat konvergensi pada dataset kustom berukuran sedang dan menjadi praktik standar pada \textit{framework} Ultralytics \cite{ultralyticsDocs}. Konfigurasi augmentasi pada Tabel~\ref{tab:augmentasi} mencerminkan augmentasi sisi platform yang diaktifkan saat pelatihan berlangsung. Untuk hyperparameter optimasi yang ditutup platform, sebagai acuan terdokumentasi, Ultralytics mengumumkan nilai \textit{default}: \textit{optimizer} = \texttt{auto} (memilih SGD atau AdamW tergantung ukuran model), \textit{learning rate} awal $\text{lr0}=0{,}01$, momentum 0,937, \textit{weight decay} $5 \times 10^{-4}$, \textit{warmup} 3 \textit{epoch}, dan bobot galat $\lambda_{\text{box}}=7{,}5$, $\lambda_{\text{cls}}=0{,}5$, $\lambda_{\text{dfl}}=1{,}5$ \cite{ultralyticsCfg}. Nilai aktual yang dipakai Roboflow Train 3.0 (Fast) tidak dipublikasikan, namun reprodusibilitas hasil dijamin lewat penguncian versi dataset dan versi model di platform sehingga eksperimen ulang dapat dilakukan pihak ketiga. Pelatihan menghasilkan berkas \textit{best.pt} berisi bobot terbaik untuk inferensi pada lapisan \textit{Ingestion \& Edge Intelligence}.
+Konfigurasi pelatihan disajikan pada Tabel~\ref{tab:hyperparameter-pelatihan}. Resolusi masukan ditetapkan pada $640 \times 640$ piksel mengikuti \textit{default} keluarga YOLOv8 yang dipilih agar kelipatan \textit{stride} 32 terpenuhi tanpa \textit{padding} yang mengubah posisi \textit{bounding box}. Pelatihan berlangsung selama 300 \textit{epoch} dengan inisialisasi bobot dari \textit{checkpoint} COCO bawaan Roboflow yang diturunkan dari pra-pelatihan YOLOv8n pada Microsoft COCO 2017. Strategi \textit{transfer learning} ini mempercepat konvergensi pada dataset kustom berukuran sedang dan menjadi praktik standar pada \textit{framework} Ultralytics \cite{ultralyticsDocs}. Konfigurasi augmentasi pada Tabel~\ref{tab:augmentasi} mencerminkan augmentasi sisi platform yang diaktifkan saat pelatihan berlangsung. Untuk hyperparameter optimasi yang diatur oleh platform, sebagai acuan terdokumentasi, Ultralytics mengumumkan nilai \textit{default}: \textit{optimizer} = \texttt{auto} (memilih SGD atau AdamW tergantung ukuran model), \textit{learning rate} awal $\text{lr0}=0{,}01$, momentum 0,937, \textit{weight decay} $5 \times 10^{-4}$, \textit{warmup} 3 \textit{epoch}, dan bobot galat $\lambda_{\text{box}}=7{,}5$, $\lambda_{\text{cls}}=0{,}5$, $\lambda_{\text{dfl}}=1{,}5$ \cite{ultralyticsCfg}.
 
 \begin{table}[H]
 \centering
 \caption{Konfigurasi pelatihan model deteksi pada platform Roboflow Train 3.0.}
 \label{tab:hyperparameter-pelatihan}
-\begin{tabular}{lll}
+\begin{tabular}{ll}
 \hline
-\textbf{Parameter} & \textbf{Nilai} & \textbf{Sumber penetapan} \\
+\textbf{Komponen} & \textbf{Konfigurasi} \\
 \hline
-Arsitektur model           & Roboflow 3.0 Object Detection (Fast)             & Platform \\
-Arsitektur acuan           & YOLOv8n (Ultralytics)                             & Turunan \\
-Resolusi masukan           & $640 \times 640$ piksel                            & Pengguna \\
-Jumlah \textit{epoch}      & 300                                                & Pengguna \\
-\textit{Checkpoint} pra-latih & COCO 2017                                       & Pengguna \\
-Rasio pembagian dataset    & 82\% / 9\% / 9\%                                  & Pengguna \\
-Augmentasi                 & 6 ragam (Tabel~\ref{tab:augmentasi})              & Pengguna \\
-\textit{Optimizer}         & Tidak dibuka; acuan: \texttt{auto}                & Platform \\
-\textit{Learning rate} awal $\text{lr0}$ & Tidak dibuka; acuan: 0,01              & Platform \\
-Momentum                   & Tidak dibuka; acuan: 0,937                        & Platform \\
-\textit{Weight decay}      & Tidak dibuka; acuan: $5 \times 10^{-4}$           & Platform \\
-$\lambda_{\text{box}} / \lambda_{\text{cls}} / \lambda_{\text{dfl}}$ & Tidak dibuka; acuan: 7,5 / 0,5 / 1,5 & Platform \\
+Platform pelatihan          & Roboflow Train 3.0 Object Detection (Fast) \\
+Arsitektur acuan            & YOLOv8n (Ultralytics) \\
+Resolusi masukan            & $640 \times 640$ piksel \\
+Jumlah \textit{epoch}       & 300 \\
+Bobot pra-latih             & COCO 2017 \\
+Rasio pembagian dataset     & 82\% / 9\% / 9\% \\
+Augmentasi                  & 6 ragam augmentasi (Tabel~\ref{tab:augmentasi}) \\
+\textit{Optimizer}          & \texttt{auto} \\
+\textit{Learning rate} awal ($lr_0$) & 0,01 \\
+Momentum                    & 0,937 \\
 \hline
 \end{tabular}
 \end{table}
 
+
 \section{Logika Deteksi Pelanggaran Helm}
 \label{sec:logika-deteksi}
 
-Sistem mengintegrasikan model deteksi objek YOLOv8 dan algoritma pelacakan multiobjek ByteTrack untuk mengidentifikasi pengendara yang menggunakan dan tidak menggunakan helm.
+Sistem menggunakan model deteksi objek YOLOv8 dan algoritma pelacakan multiobjek ByteTrack untuk mengidentifikasi pengendara yang menggunakan dan tidak menggunakan helm.
 
-Rangkaian proses integrasi sistem adalah sebagai berikut:
+Alur proses sistem adalah sebagai berikut:
 \begin{enumerate}[a.]
   \item {Inferensi Deteksi Objek (YOLOv8)}: setiap \textit{frame} video diproses menggunakan model YOLOv8 untuk menghasilkan \textit{bounding box}, label kelas (\texttt{DRIVER\_HELMET}, \texttt{DRIVER\_NO\_HELMET}, dan \texttt{MOTORCYCLE}), serta skor kepercayaan. Deteksi dikonfigurasi dengan parameter \textit{confidence threshold} 0{,}25 dan \textit{NMS IoU threshold} 0{,}7.
 
-  \item {Pelacakan Multi-Objek (ByteTrack)}: hasil deteksi dikirim ke algoritma ByteTrack yang memberikan \texttt{track\_id} persisten pada setiap objek lintas frame. ByteTrack dikonfigurasi dengan \textit{track activation threshold} 0{,}4 (membagi deteksi ke tier tinggi dan rendah), \textit{lost track buffer} 60 \textit{frame} (setara $\approx$2{,}4 detik pada FPS sumber 25 FPS atau $\approx$3{,}17 detik pada FPS efektif \textit{pipeline} 18{,}9 FPS), dan \textit{matching threshold} 0{,}85.
+  \item {Pelacakan Multi-Objek (ByteTrack)}: hasil deteksi diproses oleh ByteTrack untuk memberikan \texttt{track\_id} yang dipertahankan antar-\textit{frame}. ByteTrack dikonfigurasi dengan \textit{track activation threshold} 0{,}4 (membagi deteksi ke tier tinggi dan rendah), \textit{lost track buffer} 60 \textit{frame} (setara $\approx$2{,}4 detik pada FPS sumber 25 FPS atau $\approx$3{,}17 detik pada FPS efektif \textit{pipeline} 18{,}9 FPS), dan \textit{matching threshold} 0{,}85.
 
   \item {Asosiasi Spasial \texttt{DRIVER\_NO\_HELMET}--\texttt{MOTORCYCLE} (IoA Filter)}: setelah pelacakan, dilakukan validasi spasial antara \textit{bounding box} kelas \texttt{DRIVER\_NO\_HELMET} dengan \textit{bounding box} kelas \texttt{MOTORCYCLE} menggunakan metrik \textit{Intersection over Area} (IoA). IoA mengukur proporsi area \textit{bounding box} \texttt{DRIVER\_NO\_HELMET} yang beririsan dengan area \texttt{MOTORCYCLE}:
     \begin{equation}
       \text{IoA} = \frac{|\text{bbox}_{\texttt{DNH}} \cap \text{bbox}_{\texttt{MC}}|}{|\text{bbox}_{\texttt{DNH}}|}
     \end{equation}
-    dengan $\text{bbox}_{\texttt{DNH}}$ adalah \textit{bounding box} kelas \texttt{DRIVER\_NO\_HELMET} dan $\text{bbox}_{\texttt{MC}}$ adalah \textit{bounding box} kelas \texttt{MOTORCYCLE}. Metrik IoA dipilih ketimbang IoU karena \textit{bounding box} \texttt{DRIVER\_NO\_HELMET} umumnya jauh lebih kecil daripada \texttt{MOTORCYCLE}, sehingga IoU menghasilkan skor rendah meskipun pengendara jelas berada di atas motor. Deteksi \texttt{DRIVER\_NO\_HELMET} dianggap valid mengendarai motor jika IoA $\geq$ 0{,}3. Deteksi \texttt{DRIVER\_NO\_HELMET} tanpa asosiasi terhadap \texttt{MOTORCYCLE} (misalnya pejalan kaki) terfilter pada tahap ini.
+    dengan $\text{bbox}_{\texttt{DNH}}$ adalah \textit{bounding box} kelas \texttt{DRIVER\_NO\_HELMET} dan $\text{bbox}_{\texttt{MC}}$ adalah \textit{bounding box} kelas \texttt{MOTORCYCLE}. Metrik IoA dipilih ketimbang IoU karena \textit{bounding box} \texttt{DRIVER\_NO\_HELMET} umumnya jauh lebih kecil daripada \texttt{MOTORCYCLE}, sehingga IoU menghasilkan skor rendah meskipun pengendara berada di area sepeda motor. Deteksi \texttt{DRIVER\_NO\_HELMET} dianggap valid mengendarai motor jika IoA $\geq$ 0{,}3. Deteksi \texttt{DRIVER\_NO\_HELMET} tanpa asosiasi terhadap \texttt{MOTORCYCLE} (misalnya pejalan kaki) disaring pada tahap ini.
 
   \item {Logika Evaluasi Pelanggaran Helm}: berdasarkan hasil pelacakan dan asosiasi spasial, sistem menerapkan konfirmasi temporal \textit{N-frame} dengan kriteria sebagai berikut:
   \begin{enumerate}[1).]
     \item Label deteksi adalah \texttt{DRIVER\_NO\_HELMET}.
     \item Objek berhasil diasosiasikan secara spasial dengan \texttt{MOTORCYCLE} (IoA $\geq$ 0{,}3).
     \item Status \texttt{DRIVER\_NO\_HELMET} terdeteksi secara berurutan selama setidaknya $N$ frame ($N=3$) untuk menghindari \textit{false positive} akibat \textit{flicker} deteksi.
-    \item Mekanisme \textit{patience-based decay}: jika deteksi sesaat hilang (misalnya akibat oklusi parsial), \textit{streak} tidak langsung diatur ulang, melainkan diberi masa tenggang selama \texttt{patience\_frames} (5 frame) sebelum penghapusan.
+    \item Mekanisme \textit{patience-based decay}: jika deteksi sesaat hilang (misalnya akibat oklusi parsial), \textit{streak} tidak langsung direset, melainkan dipertahankan selama \texttt{patience\_frames} (5 frame) sebelum dihapus.
     \item Skor kepercayaan pelanggaran dihitung sebagai rata-rata \textit{confidence} dari $N$ frame yang terakumulasi, bukan hanya nilai \textit{confidence} pada frame terakhir.
     \item Deduplikasi per-track: setiap \texttt{track\_id} hanya menghasilkan paling banyak satu \textit{event} pelanggaran per sesi untuk menghindari duplikasi.
   \end{enumerate}
 \end{enumerate}
 
-\section{Rancangan Basis Data dan Skema Data Mart}
-Bagian ini menjelaskan rancangan \textit{data mart} desain skema bintang sebagai dasar analisis pelanggaran.
+\section{Desain Skema Bintang (Star Schema)}
 
-
-\subsection{Desain Skema Bintang (Star Schema)}
-Pendekatan skema bintang pada Gambar~\ref{fig:stardesign} menempatkan \texttt{fact\_violations} sebagai tabel fakta pusat dan tabel dimensi sebagai pengaya konteks waktu, lokasi, dan jenis pelanggaran. Rancangan ini dipilih karena membuat proses agregasi lebih efisien serta mendukung kebutuhan analisis operasional dan pengembangan dashboard tanpa mengubah struktur data inti.
+Pendekatan skema bintang pada Gambar~\ref{fig:stardesign} menempatkan \texttt{fact\_violations} sebagai tabel fakta pusat dan tabel dimensi sebagai penyimpan konteks waktu, lokasi, dan jenis pelanggaran. Rancangan ini dipilih karena membuat proses agregasi lebih efisien serta mendukung kebutuhan analisis operasional dan pengembangan \textit{dashboard} tanpa mengubah struktur tabel utama.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=1\textwidth]{gambar/star_schema_helm.png}
-\caption{Desain Skema Bintang Data Mart Pelanggaran Helm}
+\caption{Desain skema bintang \textit{data mart} pelanggaran helm}
 \label{fig:stardesign}
 \end{figure}
 
-\section{Rancangan Dashboard Analitik}
-Visualisasi hasil deteksi dan pelacakan dirancang dengan \textit{Grafana} yang terhubung ke \textit{data mart} untuk menyajikan ringkasan operasional dan historis secara cepat. Dashboard memuat indikator utama seperti total pelanggaran, jam tersibuk, dan rata-rata jeda antar-pelanggaran, serta analisis tren melalui grafik deret waktu 15 menit, akumulasi harian, dan komposisi periode pagi, siang, dan sore. Selain itu, dashboard juga menampilkan performa sistem dan model melalui distribusi tingkat keyakinan deteksi dan latensi pemrosesan, serta analisis strategis berupa peta panas temporal dan tabel agregat seperti \textit{Top 5 Jam Tersibuk} untuk mendukung pemantauan dan pengambilan keputusan secara lebih efisien.
+\section{Rancangan \textit{Dashboard} Analitik}
+\label{sec:rancangan-dashboard}
+
+\textit{Dashboard} analitik dirancang sebagai tampilan utama bagi UPT K3L dan unit pengamanan kampus untuk memantau pola pelanggaran helm. Data yang ditampilkan berasal dari \textit{data mart} PostgreSQL dan divisualisasikan melalui Grafana. Setiap panel dibangun menggunakan kueri SQL agregatif, sehingga data yang muncul hanya mengikuti rentang waktu yang dipilih operator. Dengan rancangan ini, \textit{dashboard} tidak hanya menampilkan jumlah pelanggaran, tetapi juga membantu melihat pola waktu, lokasi, dan kondisi teknis sistem.
+
+Susunan panel dibagi ke dalam tiga kelompok analitik. Kelompok pertama adalah ringkasan operasional yang menampilkan total pelanggaran, jam tersibuk, rata-rata jeda antar-pelanggaran, dan jumlah deteksi yang berhasil di-\textit{upsert}. Keempat metrik ini ditempatkan pada baris paling atas karena menjadi informasi awal yang paling sering dibutuhkan operator. Melalui bagian ini, operator dapat melihat kondisi pelanggaran dengan cepat tanpa harus membuka detail data mentah.
+
+Kelompok kedua berfokus pada pola waktu dan lokasi pelanggaran. Panel pada bagian ini mencakup grafik deret waktu dengan agregasi 15 menit, akumulasi harian, distribusi pagi--siang--sore, serta peta panas \textit{hour-of-day}. Visualisasi tersebut digunakan untuk melihat kapan pelanggaran paling sering terjadi dan bagaimana polanya berubah dalam satu hari. Tabel \textit{Top 5 Jam Tersibuk} juga disediakan sebagai daftar berurut agar operator lebih mudah menentukan prioritas waktu pengawasan.
+
+Kelompok ketiga digunakan untuk memantau kesehatan sistem dan performa model. Panel pada bagian ini menampilkan distribusi tingkat keyakinan deteksi, sebaran latensi inferensi, dan jumlah peristiwa yang tertolak oleh filter spasial-temporal.
+
 
 \section{Alur Penelitian}
 \label{sec:alur_penelitian}
 Alur penelitian terdiri atas empat tahap utama, mulai dari persiapan data hingga evaluasi sistem (Gambar~\ref{fig:flow-research-systematic}).
 
 \subsection{Tahap 1: Persiapan dan Pra-pemrosesan Data}
-Tahap ini menyiapkan dataset dan lingkungan eksperimen untuk pelatihan model visi komputer.
+Tahap ini menyiapkan dataset dan lingkungan pengujian untuk pelatihan model visi komputer.
 \begin{enumerate}[a.]
-\item {Pengumpulan rekaman dan ekstraksi frame selektif}: data primer diperoleh dari rekaman video luring CCTV di gerbang utama Itera. \textit{Frame} diekstraksi secara selektif berdasarkan kualitas visual untuk membentuk \textit{ITERA Helmet Dataset}.
+\item {Pengumpulan rekaman dan ekstraksi frame selektif}: data primer diperoleh dari rekaman video luring CCTV di gerbang utama Itera. \textit{Frame} diekstraksi secara selektif berdasarkan kualitas visual menjadi \textit{ITERA Helmet Dataset}.
 \item {Anotasi objek dan analisis distribusi kelas}: anotasi manual \textit{bounding box} dilakukan pada tiga kelas, yaitu \texttt{DRIVER\_HELMET}, \texttt{DRIVER\_NO\_HELMET}, dan \texttt{MOTORCYCLE}. Distribusi kelas dianalisis untuk mengurangi potensi bias pelatihan.
-\item {Pra-pemrosesan dan augmentasi data}: citra distandarkan ke resolusi $640 \times 640$ piksel. Augmentasi geometris dan fotometrik (rotasi, \textit{shear}, eksposur, \textit{noise}, dan \textit{motion blur}) diterapkan untuk meningkatkan generalisasi model.
+\item {Pra-pemrosesan dan augmentasi data}: citra distandarkan ke resolusi $640 \times 640$ piksel. Augmentasi geometris dan fotometrik (rotasi, \textit{shear}, eksposur, \textit{noise}, dan \textit{motion blur}) diterapkan untuk membantu model mengenali variasi data baru.
 \end{enumerate}
 
 \subsection{Tahap 2: Pengembangan Model Visi Komputer}
@@ -201,22 +246,22 @@ Tahap ini berfokus pada pelatihan dan evaluasi model deteksi objek untuk mengena
 Tahap ini membangun pipeline streaming terdistribusi untuk mengubah deteksi mentah menjadi \textit{event} terverifikasi.
 \begin{enumerate}[a.]
 \item {Integrasi inferensi dan pelacakan}: inferensi YOLOv8 diintegrasikan dengan pelacakan multiobjek ByteTrack pada sisi \textit{edge} untuk menjaga identitas kendaraan (\textit{Track ID}) secara persisten.
-\item {Penerapan filter logika bertingkat}: metrik IoA digunakan untuk memvalidasi asosiasi antara pengendara dan sepeda motor, lalu konfirmasi temporal \textit{N-frame} diterapkan untuk menekan \textit{false positive} akibat oklusi sesaat.
-\item {Serialisasi dan transmisi pesan}: data anomali yang lolos validasi dikemas dalam \textit{payload} JSON dan dikirim melalui Apache Kafka dengan kunci partisi \texttt{camera\_id:track\_id} agar domain urutan kejadian tetap konsisten per kamera.
-\item {Pemrosesan ETL streaming}: Apache Spark Structured Streaming mengonsumsi \textit{event} dari Kafka, melakukan \textit{micro-batching}, deduplikasi berbasis \texttt{event\_id} dengan watermark 30 detik, serta ekstraksi dimensi waktu sebelum pemuatan idempotent ke PostgreSQL melalui mekanisme \textit{upsert}.
+\item {Penerapan filter logika bertingkat}: metrik IoA digunakan untuk memvalidasi asosiasi antara pengendara dan sepeda motor, lalu konfirmasi temporal \textit{N-frame} diterapkan untuk mengurangi \textit{false positive} akibat oklusi sesaat.
+\item {Serialisasi dan transmisi pesan}: \textit{event} pelanggaran yang lolos validasi dikemas dalam \textit{payload} JSON dan dikirim melalui Apache Kafka dengan kunci partisi \texttt{camera\_id:track\_id} agar urutan kejadian tetap konsisten per kamera.
+\item {Pemrosesan ETL streaming}: Apache Spark Structured Streaming mengonsumsi \textit{event} dari Kafka, melakukan \textit{micro-batching}, deduplikasi berbasis \texttt{event\_id} dengan watermark 30 detik, serta ekstraksi dimensi waktu sebelum pemuatan \textit{idempotent} ke PostgreSQL melalui mekanisme \textit{upsert}.
 \item {Evaluasi kinerja pipeline}: efisiensi sistem diukur melalui \textit{throughput} (\textit{frame} per detik) dan latensi pemrosesan pada setiap subsistem.
 \end{enumerate}
 
 \subsection{Tahap 4: Implementasi Data Mart dan Visualisasi}
-Tahap terakhir mengonsolidasikan data operasional ke \textit{data mart} analitik dan mengevaluasi fungsionalitas akhir sistem.
+Tahap terakhir menggabungkan data operasional ke \textit{data mart} analitik dan mengevaluasi fungsi akhir sistem.
 \begin{enumerate}[a.]
-\item {Pemuatan data ke skema bintang}: data dimuat ke PostgreSQL dengan desain \textit{star schema}. Skema ini memisahkan tabel fakta (\texttt{fact\_violations}) dan tabel dimensi (\texttt{dim\_camera}, \texttt{dim\_time}, \texttt{dim\_violation\_type}) untuk mempercepat kueri agregasi.
-\item {Visualisasi dasbor analitik}: antarmuka pemantauan dibangun di Grafana yang terhubung langsung ke \textit{data mart} untuk menyajikan metrik operasional secara interaktif.
+\item {Pemuatan data ke skema bintang}: data dimuat ke PostgreSQL dengan desain \textit{star schema}. Skema ini memisahkan tabel fakta (\texttt{fact\_violations}) dan tabel dimensi (\texttt{dim\_camera}, \texttt{dim\_date}, \texttt{dim\_violation\_type}) untuk mempercepat kueri agregasi.
+\item {Visualisasi \textit{dashboard} analitik}: antarmuka pemantauan dibangun di Grafana yang terhubung langsung ke \textit{data mart} untuk menyajikan metrik operasional secara interaktif.
 \end{enumerate}
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=0.8\textwidth,height=0.78\textheight,keepaspectratio]{gambar/alur penelitian.png}
-\caption{Diagram Alur Penelitian Sistem Pelacakan Pelanggaran Helm}
+\includegraphics[width=1\textwidth,height=0.78\textheight,keepaspectratio]{gambar/alur penelitian.png}
+\caption{Diagram alur penelitian sistem pelacakan pelanggaran helm}
 \label{fig:flow-research-systematic}
 \end{figure}
