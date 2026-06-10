@@ -223,6 +223,14 @@ Bentuk keluaran model dinyatakan pada Persamaan~\ref{eq:tensor_output}:
 \label{eq:tensor_output}
 \text{Tensor Output YOLO} \in \mathbb{R}^{S \times S \times (B \cdot 5 + C)}
 \end{equation}
+\noindent dengan:
+\begin{description}
+  \item[$\mathbb{R}$:] ruang bilangan real yang menyatakan dimensi tensor keluaran model;
+  \item[$S \times S$:] jumlah sel \textit{grid} hasil pembagian citra masukan;
+  \item[$B$:] jumlah \textit{bounding box} yang diprediksi tiap sel \textit{grid};
+  \item[$5$:] jumlah parameter tiap \textit{bounding box}, yaitu $(x, y, w, h, \textit{confidence})$;
+  \item[$C$:] jumlah kelas objek yang diprediksi tiap sel.
+\end{description}
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\linewidth]{gambar/yolo_boundinbox.png}
@@ -249,6 +257,12 @@ sebelum proses \textit{non-maximum suppression} (NMS). Secara matematis,
 C = \Pr(\text{Object}) \times \text{IoU}(\text{pred}, \text{truth})
 \label{eq:IOU_revised}
 \end{equation}
+\noindent dengan:
+\begin{description}
+  \item[$C$:] skor \textit{confidence} sebuah kandidat deteksi;
+  \item[$\Pr(\text{Object})$:] probabilitas keberadaan objek pada \textit{bounding box} yang diprediksi;
+  \item[$\text{IoU}(\text{pred}, \text{truth})$:] nilai \textit{Intersection over Union} antara kotak prediksi (\textit{pred}) dan kotak anotasi acuan (\textit{truth}).
+\end{description}
 
 Fungsi kerugian YOLO menggunakan \textit{sum-squared error} untuk
 menghitung kesalahan prediksi koordinat, ukuran kotak,
@@ -262,6 +276,20 @@ fungsi kerugian ditunjukkan pada Persamaan~\ref{eq:yolo_loss}:
 \begin{split} \text{Loss} = & \lambda_{\text{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathbb{I}_{ij}^{\text{obj}} \left[ (x_i - \hat{x}_i)^2 + (y_i - \hat{y}_i)^2 \right] \\ & + \lambda_{\text{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathbb{I}_{ij}^{\text{obj}} \left[ (\sqrt{w_i} - \sqrt{\hat{w}_i})^2 + (\sqrt{h_i} - \sqrt{\hat{h}_i})^2 \right] \\ & + \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathbb{I}_{ij}^{\text{obj}} (C_i - \hat{C}_i)^2 \\ & + \lambda_{\text{noobj}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathbb{I}_{ij}^{\text{noobj}} (C_i - \hat{C}_i)^2 \\ & + \sum_{i=0}^{S^2} \mathbb{I}_{i}^{\text{obj}} \sum_{c \in \text{classes}} (p_i(c) - \hat{p}_i(c))^2
 \end{split}
 \end{equation}
+\noindent dengan:
+\begin{description}
+  \item[$\lambda_{\text{coord}}$:] bobot galat untuk komponen koordinat dan ukuran kotak;
+  \item[$\lambda_{\text{noobj}}$:] bobot penalti untuk sel yang tidak memuat objek;
+  \item[$S^2$:] jumlah seluruh sel \textit{grid}, yaitu $S \times S$;
+  \item[$B$:] jumlah \textit{bounding box} tiap sel \textit{grid};
+  \item[$\mathbb{I}_{ij}^{\text{obj}}$:] indikator bernilai 1 jika \textit{box} ke-$j$ pada sel ke-$i$ bertanggung jawab atas objek, dan 0 jika sebaliknya;
+  \item[$\mathbb{I}_{ij}^{\text{noobj}}$:] indikator bernilai 1 jika \textit{box} ke-$j$ pada sel ke-$i$ tidak memuat objek;
+  \item[$\mathbb{I}_{i}^{\text{obj}}$:] indikator bernilai 1 jika objek berada pada sel ke-$i$;
+  \item[$x_i, y_i, w_i, h_i$:] koordinat pusat, lebar, dan tinggi kotak acuan, sedangkan $\hat{x}_i, \hat{y}_i, \hat{w}_i, \hat{h}_i$ adalah nilai prediksinya;
+  \item[$C_i$:] skor \textit{confidence} acuan pada sel ke-$i$, sedangkan $\hat{C}_i$ adalah nilai prediksinya;
+  \item[$p_i(c)$:] probabilitas kelas $c$ acuan pada sel ke-$i$, sedangkan $\hat{p}_i(c)$ adalah nilai prediksinya;
+  \item[$\text{classes}$:] himpunan seluruh kelas objek.
+\end{description}
 
 Arsitektur YOLO awal terdiri atas 24 lapisan konvolusional dan 2 lapisan
 \textit{fully connected} \cite{redmon2016you}. Lapisan konvolusional
@@ -371,6 +399,48 @@ Pendekatan ini membantu meningkatkan stabilitas pelacakan pada kondisi
 \label{fig:bytetrack_two_stage}
 \end{figure}
 
+\subsection{Asosiasi Spasial Berbasis \textit{Intersection over Area} (IoA)}
+\label{subsec:ioa}
+
+Deteksi pelanggaran helm tidak cukup hanya mengenali pengendara tanpa helm,
+tetapi juga harus memastikan objek tersebut berada pada sepeda motor. Kebutuhan
+ini menuntut mekanisme asosiasi spasial antara \textit{bounding box} pengendara
+dan \textit{bounding box} sepeda motor \cite{aboah2023helmet, shoman2024enforcing}.
+Metrik tumpang tindih kotak yang umum dipakai adalah \textit{Intersection over
+Union} (IoU), yaitu rasio luas irisan terhadap luas gabungan dua kotak
+\cite{lin2014microsoft}. Akan tetapi, IoU kurang sesuai ketika kedua kotak
+berbeda ukuran secara mencolok, seperti kotak pengendara yang jauh lebih kecil
+daripada kotak sepeda motor. Pada kondisi tersebut, nilai IoU menjadi rendah
+meskipun pengendara berada di dalam area sepeda motor.
+
+\textit{Intersection over Area} (IoA) adalah varian IoU yang menormalkan luas
+irisan terhadap luas salah satu kotak, bukan terhadap luas gabungan. Pada
+asosiasi pengendara--motor, luas irisan dibagi dengan luas kotak pengendara
+sebagai kotak acuan, sehingga nilai IoA menyatakan proporsi area kotak
+pengendara yang berada di dalam kotak sepeda motor. Bentuk umum IoA antara kotak
+acuan $A$ dan kotak pembanding $B$ dinyatakan pada Persamaan~\ref{eq:ioa-umum}:
+\begin{equation}
+\label{eq:ioa-umum}
+\text{IoA}(A,B) = \frac{|A \cap B|}{|A|}
+\end{equation}
+\noindent dengan:
+\begin{description}
+  \item[$A$:] kotak pembatas acuan yang luasnya menjadi penyebut, yaitu kotak objek berukuran lebih kecil (pengendara);
+  \item[$B$:] kotak pembatas pembanding, yaitu kotak objek berukuran lebih besar (sepeda motor);
+  \item[$|A \cap B|$:] luas area irisan antara kotak $A$ dan kotak $B$, dalam satuan piksel;
+  \item[$|A|$:] luas area kotak acuan $A$, dalam satuan piksel.
+\end{description}
+
+Nilai IoA berada pada rentang $[0,1]$. Nilai mendekati 1 menunjukkan kotak acuan
+hampir sepenuhnya berada di dalam kotak pembanding, sedangkan nilai mendekati 0
+menunjukkan kedua kotak hampir tidak beririsan. Berbeda dengan IoU yang nilainya
+menyusut ketika selisih ukuran kotak besar, IoA tetap tinggi selama kotak kecil
+hampir seluruhnya berada di dalam kotak besar. Sifat ini membuat IoA lebih tepat
+untuk memverifikasi keterkaitan pengendara dengan sepeda motor pada kamera
+statis bersudut pandang menyamping \cite{shoman2024enforcing}. Ambang IoA
+ditetapkan secara empiris sebagai batas keputusan asosiasi; rinciannya dibahas
+pada Bab~\ref{chap:metodologi}.
+
 \subsection{Data Warehouse}
 
 \textit{Data warehouse} adalah sistem penyimpanan terpusat yang dirancang
@@ -470,6 +540,15 @@ TP_i &= TC_{ii}, & FP_i &= \sum_{j \neq i} TC_{ji}, \\
 FN_i &= \sum_{j \neq i} TC_{ij}, & TN_i &= \sum_{p \neq i} \sum_{q \neq i} TC_{pq}
 \end{aligned}
 \end{equation}
+\noindent dengan:
+\begin{description}
+  \item[$TC_{ij}$:] jumlah sampel berkelas sebenarnya $i$ yang diprediksi sebagai kelas $j$;
+  \item[$K$:] jumlah kelas pada kasus multikelas;
+  \item[$i$:] indeks kelas target yang sedang dianalisis;
+  \item[$j$:] indeks kelas selain kelas target ($j \neq i$);
+  \item[$p, q$:] indeks penjumlahan baris dan kolom selain kelas target pada perhitungan $TN_i$;
+  \item[$TP_i, FP_i, FN_i, TN_i$:] berturut-turut jumlah \textit{true positive}, \textit{false positive}, \textit{false negative}, dan \textit{true negative} untuk kelas $i$.
+\end{description}
 
 Makna setiap metrik adalah sebagai berikut. \textit{True Positive} (TP) adalah
 jumlah prediksi benar pada kelas yang sedang dianalisis. \textit{False
@@ -514,6 +593,12 @@ Perhitungan \textit{Precision} dan \textit{Recall} dinyatakan sebagai:
 \text{Precision} = \frac{TP}{TP + FP}, \qquad
 \text{Recall} = \frac{TP}{TP + FN}
 \end{equation}
+\noindent dengan:
+\begin{description}
+  \item[$TP$:] jumlah \textit{true positive}, yaitu deteksi positif yang benar;
+  \item[$FP$:] jumlah \textit{false positive}, yaitu deteksi positif yang keliru;
+  \item[$FN$:] jumlah \textit{false negative}, yaitu objek target yang tidak terdeteksi.
+\end{description}
 
 \textit{Intersection over Union} (IoU) digunakan untuk mengukur tingkat
 kesesuaian geometrik antara kotak prediksi dan anotasi
@@ -521,6 +606,13 @@ kesesuaian geometrik antara kotak prediksi dan anotasi
 \begin{equation}
 \text{IoU}(A,B) = \frac{|A \cap B|}{|A \cup B|}
 \end{equation}
+\noindent dengan:
+\begin{description}
+  \item[$A$:] kotak pembatas prediksi;
+  \item[$B$:] kotak pembatas anotasi acuan (\textit{ground truth});
+  \item[$|A \cap B|$:] luas area irisan antara kotak $A$ dan kotak $B$;
+  \item[$|A \cup B|$:] luas area gabungan kotak $A$ dan kotak $B$.
+\end{description}
 
 Nilai IoU yang lebih tinggi menunjukkan tumpang tindih area yang lebih besar
 antara prediksi dan anotasi, sehingga ketepatan lokalisasi objek menjadi lebih
@@ -550,6 +642,12 @@ secara matematis dinyatakan sebagai:
 \begin{equation}
 \text{AP} = \int_{0}^{1} \text{Precision}(\text{Recall}) \, d(\text{Recall})
 \end{equation}
+\noindent dengan:
+\begin{description}
+  \item[$\text{AP}$:] \textit{Average Precision}, yaitu luas area di bawah kurva \textit{Precision-Recall} satu kelas;
+  \item[$\text{Precision}(\text{Recall})$:] nilai presisi sebagai fungsi dari \textit{recall};
+  \item[$d(\text{Recall})$:] elemen integrasi terhadap \textit{recall} pada rentang $[0,1]$.
+\end{description}
 Nilai AP yang tinggi berarti model mampu mempertahankan presisi
 tinggi pada rentang \textit{recall} yang luas. Untuk menilai performa model
 secara keseluruhan lintas kelas dan ambang lokalisasi, digunakan mAP yang
@@ -558,6 +656,13 @@ merupakan rata-rata AP pada beberapa ambang IoU. Formulasi mAP pada
 \begin{equation}
 \text{mAP}_{@[0.50:0.95]} = \frac{1}{10} \sum_{k=0}^{9} \text{AP}_{\text{IoU} = 0.50 + 0.05k}
 \end{equation}
+\noindent dengan:
+\begin{description}
+  \item[$\text{mAP}_{@[0.50:0.95]}$:] rata-rata AP pada sepuluh ambang IoU dari 0{,}50 hingga 0{,}95;
+  \item[$k$:] indeks penjumlahan ambang IoU, bernilai 0 sampai 9;
+  \item[$\text{AP}_{\text{IoU} = 0.50 + 0.05k}$:] nilai AP pada ambang IoU sebesar $0{,}50 + 0{,}05k$;
+  \item[$\tfrac{1}{10}$:] faktor perata-rataan atas sepuluh ambang IoU.
+\end{description}
 
 Pendekatan ini mencakup sepuluh ambang IoU dari 0{.}50 hingga 0{.}95 dengan
 interval 0{.}05, sehingga evaluasi tidak hanya menilai keberhasilan deteksi

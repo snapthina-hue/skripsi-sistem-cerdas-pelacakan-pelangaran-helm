@@ -187,9 +187,17 @@ Alur proses sistem adalah sebagai berikut:
 
   \item {Asosiasi Spasial \texttt{DRIVER\_NO\_HELMET}--\texttt{MOTORCYCLE} (IoA Filter)}: setelah pelacakan, dilakukan validasi spasial antara \textit{bounding box} kelas \texttt{DRIVER\_NO\_HELMET} dengan \textit{bounding box} kelas \texttt{MOTORCYCLE} menggunakan metrik \textit{Intersection over Area} (IoA). IoA mengukur proporsi area \textit{bounding box} \texttt{DRIVER\_NO\_HELMET} yang beririsan dengan area \texttt{MOTORCYCLE}:
     \begin{equation}
+      \label{eq:ioa-dnh-mc}
       \text{IoA} = \frac{|\text{bbox}_{\texttt{DNH}} \cap \text{bbox}_{\texttt{MC}}|}{|\text{bbox}_{\texttt{DNH}}|}
     \end{equation}
-    dengan $\text{bbox}_{\texttt{DNH}}$ adalah \textit{bounding box} kelas \texttt{DRIVER\_NO\_HELMET} dan $\text{bbox}_{\texttt{MC}}$ adalah \textit{bounding box} kelas \texttt{MOTORCYCLE}. Metrik IoA dipilih ketimbang IoU karena \textit{bounding box} \texttt{DRIVER\_NO\_HELMET} umumnya jauh lebih kecil daripada \texttt{MOTORCYCLE}, sehingga IoU menghasilkan skor rendah meskipun pengendara berada di area sepeda motor. Deteksi \texttt{DRIVER\_NO\_HELMET} dianggap valid mengendarai motor jika IoA $\geq$ 0{,}3. Deteksi \texttt{DRIVER\_NO\_HELMET} tanpa asosiasi terhadap \texttt{MOTORCYCLE} (misalnya pejalan kaki) disaring pada tahap ini.
+    \noindent dengan:
+    \begin{description}
+      \item[$\text{bbox}_{\texttt{DNH}}$:] \textit{bounding box} kelas \texttt{DRIVER\_NO\_HELMET} sebagai kotak acuan;
+      \item[$\text{bbox}_{\texttt{MC}}$:] \textit{bounding box} kelas \texttt{MOTORCYCLE} sebagai kotak pembanding;
+      \item[$|\text{bbox}_{\texttt{DNH}} \cap \text{bbox}_{\texttt{MC}}|$:] luas area irisan antara kedua kotak, dalam satuan piksel;
+      \item[$|\text{bbox}_{\texttt{DNH}}|$:] luas area kotak \texttt{DRIVER\_NO\_HELMET}, dalam satuan piksel.
+    \end{description}
+    Metrik IoA dipilih ketimbang IoU karena \textit{bounding box} \texttt{DRIVER\_NO\_HELMET} umumnya jauh lebih kecil daripada \texttt{MOTORCYCLE}, sehingga IoU menghasilkan skor rendah meskipun pengendara berada di area sepeda motor. Deteksi \texttt{DRIVER\_NO\_HELMET} dianggap valid mengendarai motor jika IoA $\geq$ 0{,}3. Deteksi \texttt{DRIVER\_NO\_HELMET} tanpa asosiasi terhadap \texttt{MOTORCYCLE} (misalnya pejalan kaki) disaring pada tahap ini.
 
   \item {Logika Evaluasi Pelanggaran Helm}: berdasarkan hasil pelacakan dan asosiasi spasial, sistem menerapkan konfirmasi temporal \textit{N-frame} dengan kriteria sebagai berikut:
   \begin{enumerate}[1).]
